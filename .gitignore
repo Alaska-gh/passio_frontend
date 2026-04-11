@@ -5,11 +5,22 @@
 /tmp
 /out-tsc
 /bazel-out
+.angular/
+.firebase/
+firebase-debug.log
+firestore-debug.log
+.firebaserc
+src/environments/environment.prod.ts
+src/environments/environment.dev.ts
+.DS_Store
+coverage/
+npm-debug.log*
 
 # Node
 /node_modules
 npm-debug.log
 yarn-error.log
+functions/node_modules/
 
 # IDEs and editors
 .idea/

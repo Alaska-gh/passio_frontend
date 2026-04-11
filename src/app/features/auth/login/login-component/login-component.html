@@ -1,0 +1,55 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+  <div class="w-full max-w-6xl grid md:grid-cols-2 bg-white rounded-2xl overflow-hidden">
+
+    <!-- Image Section -->
+    <div class="relative hidden md:block">
+      <img src="images/carry-on-luggage-bag-in-mini-bus.jpg" alt="login page" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-black/40"></div>
+
+      <div class="absolute bottom-8 left-8 text-white">
+        <h2 class="text-2xl font-bold">Travel with Ease</h2>
+        <p class="text-sm text-gray-200">Manage your bookings seamlessly</p>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="p-8 md:p-12 flex flex-col justify-center">
+
+      <h1 class="text-3xl font-extrabold text-center text-gray-800">Passio</h1>
+
+      <h2 class="text-xl font-bold mt-6 text-center">Welcome Back</h2>
+      <p class="text-gray-500 text-sm text-center">
+        Please enter your details to continue
+      </p>
+
+      <!-- Select Button -->
+      <div class="mt-6">
+        <p-selectButton [options]="authenticationOptions" [(ngModel)]="value" optionLabel="label" optionValue="value"
+          styleClass="w-full flex justify-center"></p-selectButton>
+      </div>
+
+      <!-- Form -->
+      <form class="mt-6 flex flex-col gap-4">
+        <input type="email" placeholder="Email address"
+          class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+        <p-button label="Continue" styleClass="w-full"></p-button>
+      </form>
+
+      <!-- Divider -->
+      <div class="flex items-center my-6 gap-3">
+        <div class="h-px bg-gray-300 flex-1"></div>
+        <span class="text-xs text-gray-500">Or continue with</span>
+        <div class="h-px bg-gray-300 flex-1"></div>
+      </div>
+
+      <!-- Social Login -->
+      <div class="flex justify-center gap-6 text-gray-600">
+        <i class="fab fa-google text-2xl cursor-pointer hover:text-red-500 transition"></i>
+        <i class="fab fa-apple text-2xl cursor-pointer hover:text-black transition"></i>
+        <i class="fab fa-facebook text-2xl cursor-pointer hover:text-blue-600 transition"></i>
+      </div>
+
+    </div>
+  </div>
+</div>

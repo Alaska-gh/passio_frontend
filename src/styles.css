@@ -1,3 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import "primeicons/primeicons.css";
+
+/* Make full width */
+.p-selectbutton {
+  width: 100%;
+  display: flex;
+}
+
+/* Default button style (unselected) */
+.p-selectbutton .p-button {
+  flex: 1;
+  background: #e5e7eb; /* Tailwind gray-200 */
+  border: none;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+/* Selected button */
+.p-selectbutton .p-button.p-highlight {
+  background: white !important;
+  color: black !important;
+  font-weight: 600;
+}
+
+/* Hover effect */
+.p-selectbutton .p-button:not(.p-highlight):hover {
+  background: #d1d5db;
+}
