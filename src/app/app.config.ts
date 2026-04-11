@@ -9,3 +9,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes)
   ]
 };
+// "paths": {
+//   "@core/*":     ["src/app/core/*"],
+//   "@shared/*":   ["src/app/shared/*"],
+//   "@features/*": ["src/app/features/*"],
+//   "@env/*":      ["src/environments/*"]
+// }
