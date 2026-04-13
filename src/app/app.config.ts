@@ -1,7 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
-
 import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
 import Lara from '@primeng/themes/lara';
@@ -25,10 +24,27 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: false,
         },
       },
-    }), provideFirebaseApp(() => initializeApp({ projectId: "passio-945fd", appId: "1:36645642297:web:c38a95f33bd34074e7ede8", storageBucket: "passio-945fd.firebasestorage.app", apiKey: "AIzaSyDr4BIkw9jyw2QqMXhBWXdz8XgmzupM9R8", authDomain: "passio-945fd.firebaseapp.com", messagingSenderId: "36645642297", projectNumber: "36645642297", version: "2" })), provideAuth(() => getAuth()), provideFirestore(() => getFirestore()), provideDatabase(() => getDatabase()), provideFunctions(() => getFunctions()), provideMessaging(() => getMessaging()), provideStorage(() => getStorage()), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+    }),
+    provideFirebaseApp(() =>
+      initializeApp({
+        projectId: 'passio-945fd',
+        appId: '1:36645642297:web:c38a95f33bd34074e7ede8',
+        storageBucket: 'passio-945fd.firebasestorage.app',
+        apiKey: 'AIzaSyDr4BIkw9jyw2QqMXhBWXdz8XgmzupM9R8',
+        authDomain: 'passio-945fd.firebaseapp.com',
+        messagingSenderId: '36645642297',
+      }),
+    ),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore()),
+    provideDatabase(() => getDatabase()),
+    provideFunctions(() => getFunctions()),
+    provideMessaging(() => getMessaging()),
+    provideStorage(() => getStorage()),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 };
 // "paths": {

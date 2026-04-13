@@ -1,0 +1,19 @@
+{
+  "name": "RouteGH",
+  "short_name": "RouteGH",
+  "description": "Ghana Bus Transport Management System",
+  "theme_color": "#0C447C",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
