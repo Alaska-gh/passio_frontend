@@ -1,55 +1,104 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from '@angular/core';
-import { provideRouter } from '@angular/router';
-
-import { routes } from './app.routes';
-import { providePrimeNG } from 'primeng/config';
-import Lara from '@primeng/themes/lara';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { getDatabase, provideDatabase } from '@angular/fire/database';
-import { getFunctions, provideFunctions } from '@angular/fire/functions';
-import { getMessaging, provideMessaging } from '@angular/fire/messaging';
-import { getStorage, provideStorage } from '@angular/fire/storage';
+import { ApplicationConfig, isDevMode } from '@angular/core';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
+
+// NgRx
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
+// Firebase
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { getFirestore, provideFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import { getFunctions, provideFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
+import { getStorage, provideStorage, connectStorageEmulator } from '@angular/fire/storage';
+import { getMessaging, provideMessaging } from '@angular/fire/messaging';
+
+import { routes } from './app.routes';
+import { authInterceptor } from '@core/interceptors/auth.interceptor';
+import { errorInterceptor } from '@core/interceptors/error.interceptor';
+import { metaReducers, reducers } from '@core/store';
+import { AuthEffects } from '@core/store/auth/auth.effects';
+import { SchedulesEffects } from '@core/store/schedules/schedules.effects';
+import { TicketsEffects } from '@core/store/tickets/tickets.effects';
+import { BusesEffects } from '@core/store/buses/buses.effects';
+import { TripsEffects } from '@core/store/trips/trips.effects';
+import { environment } from 'src/environments/environment.dev';
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    providePrimeNG({
-      theme: {
-        preset: Lara,
-        options: {
-          darkModeSelector: false,
-        },
-      },
-    }),
-    provideFirebaseApp(() =>
-      initializeApp({
-        projectId: 'passio-945fd',
-        appId: '1:36645642297:web:c38a95f33bd34074e7ede8',
-        storageBucket: 'passio-945fd.firebasestorage.app',
-        apiKey: 'AIzaSyDr4BIkw9jyw2QqMXhBWXdz8XgmzupM9R8',
-        authDomain: 'passio-945fd.firebaseapp.com',
-        messagingSenderId: '36645642297',
-      }),
+    // ── Router ──────────────────────────────────────────────
+    provideRouter(
+      routes,
+      withComponentInputBinding(), // lets you bind route params as @Input()
+      withViewTransitions(), // smooth page transitions
     ),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideDatabase(() => getDatabase()),
-    provideFunctions(() => getFunctions()),
+
+    // ── HTTP ────────────────────────────────────────────────
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+
+    // ── Animations ──────────────────────────────────────────
+    provideAnimations(),
+
+    // ── NgRx Store ──────────────────────────────────────────
+    provideStore(reducers, { metaReducers }),
+
+    provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects]),
+
+    // Redux DevTools — only in dev mode
+    provideStoreDevtools({
+      maxAge: 25,
+      logOnly: !isDevMode(),
+      autoPause: true,
+      trace: false,
+    }),
+
+    // ── Firebase ────────────────────────────────────────────
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+
+    provideAuth(() => {
+      const auth = getAuth();
+      if (environment.useEmulators) {
+        connectAuthEmulator(auth, 'http://localhost:9099', {
+          disableWarnings: true,
+        });
+      }
+      return auth;
+    }),
+
+    provideFirestore(() => {
+      const db = getFirestore();
+      if (environment.useEmulators) {
+        connectFirestoreEmulator(db, 'localhost', 8080);
+      }
+      return db;
+    }),
+
+    provideFunctions(() => {
+      const fns = getFunctions();
+      if (environment.useEmulators) {
+        connectFunctionsEmulator(fns, 'localhost', 5001);
+      }
+      return fns;
+    }),
+
+    provideStorage(() => {
+      const storage = getStorage();
+      if (environment.useEmulators) {
+        connectStorageEmulator(storage, 'localhost', 9199);
+      }
+      return storage;
+    }),
+
     provideMessaging(() => getMessaging()),
-    provideStorage(() => getStorage()),
+
+    // ── PWA Service Worker ───────────────────────────────────
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    provideStore(),
-    provideEffects(),
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
 };

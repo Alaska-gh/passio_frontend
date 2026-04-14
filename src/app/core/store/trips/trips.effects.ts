@@ -27,10 +27,12 @@ export class TripsEffects {
     this.actions$.pipe(
       ofType(TripsActions.recordReturn),
       switchMap(({ payload }) =>
-        this.tripService
-          .recordReturn(payload)
-          .then((result) => TripsActions.recordReturnSuccess({ result }))
-          .catch((err) => TripsActions.recordReturnFailure({ error: err.message })),
+        this.tripService.recordReturn(payload).pipe(
+          map((result) => TripsActions.recordReturnSuccess({ result })),
+          catchError((error) => {
+            return of(TripsActions.recordReturnFailure({ error: error.message }));
+          }),
+        ),
       ),
     ),
   );

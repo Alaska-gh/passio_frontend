@@ -3,7 +3,7 @@
 
     <!-- Image Section -->
     <div class="relative hidden md:block">
-      <img src="images/carry-on-luggage-bag-in-mini-bus.jpg" alt="login page" class="w-full h-full object-cover" />
+      <img src="images/toyota_hiace_cars.png" alt="login page" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div class="absolute bottom-8 left-8 text-white">
@@ -17,7 +17,7 @@
 
       <h1 class="text-3xl font-extrabold text-center text-gray-800">Passio</h1>
 
-      <h2 class="text-xl font-bold mt-6 text-center">Welcome Back</h2>
+      <h2 class="text-xl font-bold mt-6 text-center bg-primary">Welcome Back</h2>
       <p class="text-gray-500 text-sm text-center">
         Please enter your details to continue
       </p>
@@ -29,15 +29,38 @@
       </div>
 
       <!-- Form -->
-      <form class="mt-6 flex flex-col gap-4">
-        <input type="email" placeholder="Email address"
-          class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <form class="mt-6 flex flex-col gap-4" formGroup="form" (ngSubmit)="submit()">
+        <!-- <input type="tel" placeholder="+233 XXX XXXXXX" formControlName="phone" inputmode="tel" autocomplete="tel"
+          maxlength="10"
+          class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" /> -->
 
-        <p-button label="Continue" styleClass="w-full"></p-button>
+        <p-inputgroup>
+          <p-inputgroup-addon>
+            <span class="text-gray-600 font-medium text-sm">+233</span>
+          </p-inputgroup-addon>
+          <input pInputText id="phone" type="tel" formControlName="phone" placeholder="24 XXX XXXX" inputmode="tel"
+            autocomplete="tel" maxlength="10" class="w-full" [class.ng-invalid]="phoneInvalid"
+            [class.ng-dirty]="phoneControl.touched" />
+        </p-inputgroup>
+        @if (phoneControl.touched && phoneControl.hasError('required')) {
+        <span class="text-red-600">Phone number is required</span>
+        }
+        @if (phoneControl.touched && phoneControl.hasError('pattern')) {
+        <span class="text-red-600">Enter a valid Ghana mobile number</span>
+        }
+
+        <ng-container *ngIf="error$ | async as error">
+          <div class="text-red-500">
+            {{ error }}
+          </div>
+        </ng-container>
+
+        <p-button id="otp-btn" type="submit" label="Send OTP" styleClass="w-full" size="large"
+          [loading]="(loading$ | async) ?? false" [disabled]="(loading$ | async) ?? false" />
       </form>
 
       <!-- Divider -->
-      <div class="flex items-center my-6 gap-3">
+      <div class="flex items-center my- gap-3">
         <div class="h-px bg-gray-300 flex-1"></div>
         <span class="text-xs text-gray-500">Or continue with</span>
         <div class="h-px bg-gray-300 flex-1"></div>

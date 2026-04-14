@@ -2,6 +2,7 @@
   "name": "passio-frontend",
   "short_name": "passio-frontend",
   "display": "standalone",
+  "description": "Ghana Bus Transport Management System",
   "scope": "./",
   "start_url": "./",
   "icons": [

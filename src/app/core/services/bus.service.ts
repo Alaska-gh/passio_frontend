@@ -11,19 +11,21 @@ import {
   where,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { Bus, BusStatus } from '@core/interfaces/bus.interface';
 
 @Injectable({ providedIn: 'root' })
 export class BusService {
   private firestore = inject(Firestore);
 
+  /** Real-time stream of all buses */
   getAllBuses(): Observable<Bus[]> {
     return collectionData(collection(this.firestore, 'buses'), { idField: 'id' }) as Observable<
       Bus[]
     >;
   }
 
+  /** Real-time stream of active buses only */
   getActiveBuses(): Observable<Bus[]> {
     return collectionData(
       query(collection(this.firestore, 'buses'), where('status', '==', 'active')),
@@ -31,24 +33,30 @@ export class BusService {
     ) as Observable<Bus[]>;
   }
 
+  /** Real-time stream of a single bus */
   getBusById(id: string): Observable<Bus | undefined> {
     return docData(doc(this.firestore, 'buses', id), { idField: 'id' }) as Observable<
       Bus | undefined
     >;
   }
 
-  createBus(bus: Omit<Bus, 'id' | 'createdAt'>): Promise<void> {
-    return addDoc(collection(this.firestore, 'buses'), {
-      ...bus,
-      createdAt: serverTimestamp(),
-    }).then(() => undefined);
+  /** Create a new bus */
+  createBus(bus: Omit<Bus, 'id' | 'createdAt'>): Observable<void> {
+    return from(
+      addDoc(collection(this.firestore, 'buses'), {
+        ...bus,
+        createdAt: serverTimestamp(),
+      }).then(() => undefined),
+    );
   }
 
-  updateBus(id: string, changes: Partial<Bus>): Promise<void> {
-    return updateDoc(doc(this.firestore, 'buses', id), changes as Record<string, Bus>);
+  /** Update bus fields */
+  updateBus(id: string, changes: Partial<Bus>): Observable<void> {
+    return from(updateDoc(doc(this.firestore, 'buses', id), changes as Record<string, Bus>));
   }
 
-  updateStatus(id: string, status: BusStatus): Promise<void> {
-    return updateDoc(doc(this.firestore, 'buses', id), { status });
+  /** Update bus status only */
+  updateStatus(id: string, status: BusStatus): Observable<void> {
+    return from(updateDoc(doc(this.firestore, 'buses', id), { status }));
   }
 }

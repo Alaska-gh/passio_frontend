@@ -28,8 +28,11 @@ export class BusesEffects {
       switchMap(({ bus }) =>
         this.busService
           .createBus(bus)
-          .then(() => BusesActions.createBusSuccess())
-          .catch((err) => BusesActions.createBusFailure({ error: err.message })),
+          .pipe(map(() => BusesActions.createBusSuccess()),
+            catchError((err) => {
+              return of(BusesActions.createBusFailure({ error: err.message }));
+            })
+          )
       ),
     ),
   );
@@ -38,10 +41,12 @@ export class BusesEffects {
     this.actions$.pipe(
       ofType(BusesActions.updateBus),
       switchMap(({ id, changes }) =>
-        this.busService
-          .updateBus(id, changes)
-          .then(() => BusesActions.updateBusSuccess())
-          .catch((err) => BusesActions.updateBusFailure({ error: err.message })),
+        this.busService.updateBus(id, changes).pipe(
+          map(() => BusesActions.updateBusSuccess()),
+          catchError((err) => {
+            return of(BusesActions.updateBusFailure({ error: err.message }));
+          }),
+        ),
       ),
     ),
   );

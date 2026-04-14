@@ -31,8 +31,11 @@ export class TicketsEffects {
       switchMap(({ payload }) =>
         this.ticketService
           .purchaseTicket(payload)
-          .then((result) => TicketsActions.purchaseTicketSuccess({ result }))
-          .catch((err) => TicketsActions.purchaseTicketFailure({ error: err.message })),
+          .pipe(map((result) => TicketsActions.purchaseTicketSuccess({ result })),
+            catchError((err) => {
+            return of(TicketsActions.purchaseTicketFailure({ error: err.message }));
+          })
+        )
       ),
     ),
   );
@@ -56,10 +59,12 @@ export class TicketsEffects {
     this.actions$.pipe(
       ofType(TicketsActions.verifyTicket),
       switchMap(({ qrPayload }) =>
-        this.ticketService
-          .verifyTicket(qrPayload)
-          .then((result) => TicketsActions.verifyTicketSuccess({ result }))
-          .catch((err) => TicketsActions.verifyTicketFailure({ error: err.message })),
+        this.ticketService.verifyTicket(qrPayload).pipe(
+          map((result) => TicketsActions.verifyTicketSuccess({ result })),
+          catchError((err) => {
+            return of(TicketsActions.verifyTicketFailure({ error: err.message }));
+          }),
+        ),
       ),
     ),
   );

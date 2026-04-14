@@ -1,19 +1,81 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormsModule, Validators } from '@angular/forms';
+import { AuthActions } from '@core/store/auth/auth.actions';
+import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/auth/auth.selectors';
+import { Store } from '@ngrx/store';
 import { ButtonModule } from 'primeng/button';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-login-component',
-  imports: [FormsModule, SelectButtonModule, ButtonModule],
+  imports: [
+    FormsModule,
+    SelectButtonModule,
+    ButtonModule,
+    CommonModule,
+    InputGroupModule,
+    InputGroupAddonModule,
+  ],
   templateUrl: './login-component.html',
   styleUrl: './login-component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
+  loading$!: Observable<boolean>;
+  error$!: Observable<string | null>;
+  otpSent$!: Observable<boolean>;
+
+  @ViewChild('otpBtn', { read: ElementRef })
+  otpBtn!: ElementRef<HTMLElement>;
+
   authenticationOptions = [
     { label: 'Sign In', value: 'sign_in' },
     { label: 'Signup', value: 'sign_up' },
   ];
 
   value: string = 'sign_in';
+
+  private store = inject(Store);
+  private fb = inject(FormBuilder);
+  private destroy$ = new Subject<void>();
+
+  form = this.fb.group({
+    phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9,10}$/)]],
+  });
+
+  ngOnInit(): void {
+    this.loading$ = this.store.select(selectAuthLoading);
+    this.error$ = this.store.select(selectAuthError);
+    this.otpSent$ = this.store.select(selectOtpSent);
+  }
+
+  get phoneControl(): AbstractControl {
+    return this.form.get('phone')!;
+  }
+
+  get phoneInvalid(): boolean {
+    return this.phoneControl.touched && this.phoneControl.invalid;
+  }
+
+  submit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.form.value.phone!.replace(/\s/g, '');
+    const normalized = raw.startsWith('0') ? raw.slice(1) : raw;
+    const phoneNumber = `+233${normalized}`;
+
+    // Dispatch to the store — the Effect handles everything else
+    this.store.dispatch(AuthActions.sendOtp({ phoneNumber }));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
