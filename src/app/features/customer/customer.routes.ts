@@ -18,7 +18,7 @@ export const CUSTOMER_ROUTES: Routes = [
   },
   {
     path: 'ticket',
-    canActivate: [authGuard, roleGuard(['customer'])],
+    // canActivate: [authGuard, roleGuard(['customer'])],
     loadComponent: () =>
       import('./customer-ticket.component/customer-ticket.component').then(
         (m) => m.CustomerTicketComponent,
@@ -26,7 +26,7 @@ export const CUSTOMER_ROUTES: Routes = [
   },
   {
     path: 'route',
-    canActivate: [authGuard, roleGuard(['customer'])],
+    // canActivate: [authGuard, roleGuard(['customer'])],
     loadComponent: () =>
       import('./customer-routes.component/customer-routes.component').then(
         (m) => m.CustomerRoutesComponent,

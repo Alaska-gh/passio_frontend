@@ -2,10 +2,12 @@ import { Store } from '@ngrx/store';
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthActions } from '@core/store/auth/auth.actions';
+import { HeaderComponent } from '@core/header/header.component/header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, HeaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

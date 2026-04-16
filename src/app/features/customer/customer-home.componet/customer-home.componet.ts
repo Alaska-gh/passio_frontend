@@ -8,10 +8,4 @@ import { Button } from 'primeng/button';
   templateUrl: './customer-home.componet.html',
   styleUrl: './customer-home.componet.css',
 })
-export class CustomerHomeComponet {
-  constructor(private router: Router) {}
-
-  goToLogin() {
-    this.router.navigate(['/auth/login']);
-  }
-}
+export class CustomerHomeComponet {}

@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { AuthActions } from '@core/store/auth/auth.actions';
 import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/auth/auth.selectors';
 import { Store } from '@ngrx/store';
