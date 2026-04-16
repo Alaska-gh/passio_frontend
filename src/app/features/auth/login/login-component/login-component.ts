@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthActions } from '@core/store/auth/auth.actions';
 import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/auth/auth.selectors';
 import { Store } from '@ngrx/store';
@@ -13,7 +13,7 @@ import { Observable, Subject } from 'rxjs';
 @Component({
   selector: 'app-login-component',
   imports: [
-    FormsModule,
+    ReactiveFormsModule,
     SelectButtonModule,
     ButtonModule,
     CommonModule,
@@ -44,6 +44,7 @@ export class LoginComponent implements OnInit {
 
   form = this.fb.group({
     phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9,10}$/)]],
+    // authType: ['']
   });
 
   ngOnInit(): void {

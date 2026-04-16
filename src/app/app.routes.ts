@@ -6,39 +6,38 @@ export const routes: Routes = [
   // Default redirect
   {
     path: '',
-    redirectTo: 'customer/routes',
+    redirectTo: 'customer',
     pathMatch: 'full',
   },
 
-  // Auth (public) 
+  // Auth (public)
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
 
-  // Customer portal 
-  // {
-  //   path: 'customer',
-  //   canActivate: [authGuard, roleGuard(['customer'])],
-  //   loadChildren: () =>
-  //     import('./features/customer/customer.routes').then((m) => m.CUSTOMER_ROUTES),
-  // },
+  // Customer portal
+  {
+    path: 'customer',
+    loadChildren: () =>
+      import('./features/customer/customer.routes').then((m) => m.CUSTOMER_ROUTES),
+  },
 
-  //  Admin dashboard 
+  //  Admin dashboard
   // {
   //   path: 'admin',
   //   canActivate: [authGuard, roleGuard(['admin'])],
   //   loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   // },
 
-  //  Driver app 
+  //  Driver app
   // {
   //   path: 'driver',
   //   canActivate: [authGuard, roleGuard(['driver'])],
   //   loadChildren: () => import('./features/driver/driver.routes').then((m) => m.DRIVER_ROUTES),
   // },
 
-  //  Conductor scanner 
+  //  Conductor scanner
   // {
   //   path: 'conductor',
   //   canActivate: [authGuard, roleGuard(['conductor'])],
@@ -46,7 +45,7 @@ export const routes: Routes = [
   //     import('./features/conductor/conductor.routes').then((m) => m.CONDUCTOR_ROUTES),
   // },
 
-  //  404 fallback 
+  //  404 fallback
   // {
   //   path: '**',
   //   loadComponent: () =>

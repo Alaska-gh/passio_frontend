@@ -15,6 +15,6 @@ export class App implements OnInit {
   private store = inject(Store);
 
   ngOnInit(): void {
-    this.store.dispatch(AuthActions.loadProfile());
+    // this.store.dispatch(AuthActions.loadProfile());
   }
 }

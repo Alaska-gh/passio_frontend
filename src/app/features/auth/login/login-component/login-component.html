@@ -15,7 +15,8 @@
     <!-- Form Section -->
     <div class="p-8 md:p-12 flex flex-col justify-center">
 
-      <h1 class="text-3xl font-extrabold text-center text-gray-800">Passio</h1>
+      <h1 class="text-3xl font-extrabold text-center text-gray-800">Passio<span
+          class="text-4xl text-orange-600">.</span></h1>
 
       <h2 class="text-xl font-bold mt-6 text-center bg-primary">Welcome Back</h2>
       <p class="text-gray-500 text-sm text-center">
@@ -23,30 +24,24 @@
       </p>
 
       <!-- Select Button -->
-      <div class="mt-6">
+      <!-- <div class="mt-6">
         <p-selectButton [options]="authenticationOptions" [(ngModel)]="value" optionLabel="label" optionValue="value"
           styleClass="w-full flex justify-center"></p-selectButton>
-      </div>
+      </div> -->
 
       <!-- Form -->
-      <form class="mt-6 flex flex-col gap-4" formGroup="form" (ngSubmit)="submit()">
+      <form class="mt-6 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
         <!-- <input type="tel" placeholder="+233 XXX XXXXXX" formControlName="phone" inputmode="tel" autocomplete="tel"
           maxlength="10"
           class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" /> -->
 
-        <p-inputgroup>
-          <p-inputgroup-addon>
-            <span class="text-gray-600 font-medium text-sm">+233</span>
-          </p-inputgroup-addon>
-          <input pInputText id="phone" type="tel" formControlName="phone" placeholder="24 XXX XXXX" inputmode="tel"
-            autocomplete="tel" maxlength="10" class="w-full" [class.ng-invalid]="phoneInvalid"
-            [class.ng-dirty]="phoneControl.touched" />
-        </p-inputgroup>
+        <input pInputText id="phone" type="tel" formControlName="phone" placeholder="+233 24 XXX XXXX" inputmode="tel"
+          class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none" autocomplete="tel" maxlength="10" />
         @if (phoneControl.touched && phoneControl.hasError('required')) {
-        <span class="text-red-600">Phone number is required</span>
+        <span class="text-red-600 text-sm mx-auto">Phone number is required</span>
         }
         @if (phoneControl.touched && phoneControl.hasError('pattern')) {
-        <span class="text-red-600">Enter a valid Ghana mobile number</span>
+        <span class="text-red-600 text-sm mx-auto">Enter a valid Ghana mobile number</span>
         }
 
         <ng-container *ngIf="error$ | async as error">
@@ -55,12 +50,13 @@
           </div>
         </ng-container>
 
-        <p-button id="otp-btn" type="submit" label="Send OTP" styleClass="w-full" size="large"
+        <p-button id="otp-btn" type="submit" label="Send OTP" styleClass="w-full"
+          class="bg-orange-600 text-white px-5 py-2 rounded-lg shadow hover:bg-orange-700"
           [loading]="(loading$ | async) ?? false" [disabled]="(loading$ | async) ?? false" />
       </form>
 
       <!-- Divider -->
-      <div class="flex items-center my- gap-3">
+      <div class="flex items-center my-6 gap-3">
         <div class="h-px bg-gray-300 flex-1"></div>
         <span class="text-xs text-gray-500">Or continue with</span>
         <div class="h-px bg-gray-300 flex-1"></div>

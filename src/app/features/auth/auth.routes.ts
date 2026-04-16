@@ -7,11 +7,13 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'login',
     canActivate: [guestGuard],
-    component: LoginComponent
+    loadComponent: () =>
+      import('./login/login-component/login-component').then((m) => m.LoginComponent),
   },
   {
     path: 'verify',
-    component: VerifyOtpComponent
+    loadComponent: () =>
+      import('./verify-otp/verify-otp.component/verify-otp.component').then((m) => m.VerifyOtpComponent),
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
