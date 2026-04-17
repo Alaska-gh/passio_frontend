@@ -15,6 +15,7 @@ import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/f
 import { AuthActions } from './auth.actions';
 import { User, UserRole } from '@core/interfaces/user.interface';
 import { UiActions } from '../ui/ui.actions';
+import { AuthService } from '@core/services/auth.service';
 
 @Injectable()
 export class AuthEffects {
@@ -22,6 +23,7 @@ export class AuthEffects {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   private confirmationResult: ConfirmationResult | null = null;
   private recaptchaVerifier: RecaptchaVerifier | null = null;
@@ -49,8 +51,12 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.sendOtp),
       switchMap(({ phoneNumber }) =>
-        from(this.doSendOtp(phoneNumber)).pipe(
-          map(() => AuthActions.sendOtpSuccess()),
+        this.authService.sendOtp(phoneNumber).pipe(
+          map((res) => {
+            console.log(res);
+
+            return AuthActions.sendOtpSuccess();
+          }),
           catchError((err) =>
             of(AuthActions.sendOtpFailure({ error: this.friendlyAuthError(err) })),
           ),
@@ -131,20 +137,23 @@ export class AuthEffects {
   );
 
   // ── Private helpers ──────────────────────────────────────
-  private async doSendOtp(phoneNumber: string): Promise<void> {
-    this.recaptchaVerifier?.clear();
-    const btn = document.getElementById('otp-btn') as HTMLElement;
-    this.recaptchaVerifier = new RecaptchaVerifier(this.auth, btn, {
-      size: 'invisible',
-      callback: () => {},
-    });
-    this.confirmationResult = await signInWithPhoneNumber(
-      this.auth,
-      phoneNumber,
-      this.recaptchaVerifier,
-    );
-    sessionStorage.setItem('rgh_pending_phone', phoneNumber);
-  }
+  // private async doSendOtp(phoneNumber: string): Promise<void> {
+  //   this.recaptchaVerifier?.clear();
+  //   const btn = document.getElementById('otp-btn') as HTMLElement;
+  //   this.recaptchaVerifier = new RecaptchaVerifier(this.auth, btn, {
+  //     size: 'invisible',
+  //     callback: () => {},
+  //   });
+  //   this.confirmationResult = await signInWithPhoneNumber(
+  //     this.auth,
+  //     phoneNumber,
+  //     this.recaptchaVerifier,
+  //   );
+  //   sessionStorage.setItem('rgh_pending_phone', phoneNumber);
+  //   console.log(this.confirmationResult);
+  //   console.log(this.recaptchaVerifier);
+  //   console.log(phoneNumber);
+  // }
 
   private async doVerifyOtp(code: string): Promise<User> {
     if (!this.confirmationResult) {

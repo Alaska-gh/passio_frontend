@@ -12,20 +12,11 @@ import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/a
 import { Store } from '@ngrx/store';
 import { ButtonModule } from 'primeng/button';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-login-component',
-  imports: [
-    ReactiveFormsModule,
-    SelectButtonModule,
-    ButtonModule,
-    CommonModule,
-    InputGroupModule,
-    InputGroupAddonModule,
-  ],
+  imports: [ReactiveFormsModule, SelectButtonModule, ButtonModule, CommonModule],
   templateUrl: './login-component.html',
   styleUrl: './login-component.css',
 })
@@ -37,20 +28,12 @@ export class LoginComponent implements OnInit {
   @ViewChild('otpBtn', { read: ElementRef })
   otpBtn!: ElementRef<HTMLElement>;
 
-  authenticationOptions = [
-    { label: 'Sign In', value: 'sign_in' },
-    { label: 'Signup', value: 'sign_up' },
-  ];
-
-  value: string = 'sign_in';
-
   private store = inject(Store);
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<void>();
 
   form = this.fb.group({
     phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9,10}$/)]],
-    // authType: ['']
   });
 
   ngOnInit(): void {

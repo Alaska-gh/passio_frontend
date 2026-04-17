@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   Auth,
@@ -18,6 +18,7 @@ export class AuthService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
+  private injector = inject(Injector);
 
   private confirmationResult: ConfirmationResult | null = null;
   private recaptchaVerifier: RecaptchaVerifier | null = null;
@@ -41,34 +42,34 @@ export class AuthService {
     }),
   );
 
-  /**
-   * Step 1 — request an OTP.
-   * Returns an Observable that completes when the SMS is dispatched.
-   */
-  sendOtp(phoneNumber: string, buttonEl: HTMLElement): Observable<void> {
-    return new Observable<void>((subscriber) => {
-      this.recaptchaVerifier?.clear();
+  //  Step 1 — request an OTP.
 
-      this.recaptchaVerifier = new RecaptchaVerifier(this.auth, buttonEl, {
+  // sendOtp(phoneNumber: string) {
+  //   if (this.recaptchaVerifier) {
+  //     this.recaptchaVerifier.clear();
+  //     this.recaptchaVerifier = null;
+  //   }
+  //   const verifier = new RecaptchaVerifier(this.auth, 'recaptcha-container', {
+  //     size: 'invisible',
+  //   });
+
+  //   return from(signInWithPhoneNumber(this.auth, phoneNumber, verifier));
+  // }
+
+  sendOtp(phoneNumber: string) {
+    return runInInjectionContext(this.injector, () => {
+      if (this.recaptchaVerifier) {
+        this.recaptchaVerifier.clear();
+        this.recaptchaVerifier = null;
+      }
+
+      this.recaptchaVerifier = new RecaptchaVerifier(this.auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => {},
       });
 
-      signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier)
-        .then((result) => {
-          this.confirmationResult = result;
-          sessionStorage.setItem('rgh_pending_phone', phoneNumber);
-          subscriber.next();
-          subscriber.complete();
-        })
-        .catch((err) => {
-          this.recaptchaVerifier?.clear();
-          this.recaptchaVerifier = null;
-          subscriber.error(err);
-        });
+      return from(signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier));
     });
   }
-
   /**
    * Step 2 — verify the OTP code.
    * Returns an Observable that emits the User profile on success.
