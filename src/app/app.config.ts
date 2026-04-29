@@ -12,7 +12,12 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 // Firebase
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth, connectAuthEmulator } from '@angular/fire/auth';
-import { getFirestore, provideFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import {
+  getFirestore,
+  provideFirestore,
+  connectFirestoreEmulator,
+  initializeFirestore,
+} from '@angular/fire/firestore';
 import { getFunctions, provideFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
 import { getStorage, provideStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { getMessaging, provideMessaging } from '@angular/fire/messaging';
@@ -27,23 +32,35 @@ import { TicketsEffects } from '@core/store/tickets/tickets.effects';
 import { BusesEffects } from '@core/store/buses/buses.effects';
 import { TripsEffects } from '@core/store/trips/trips.effects';
 import { environment } from 'src/environments/environment.dev';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeuix/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // ── Router ──────────────────────────────────────────────
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+        options: {
+          darkModeSelector: 'none',
+        },
+      },
+    }),
+    // Router
     provideRouter(
       routes,
       withComponentInputBinding(), // lets you bind route params as @Input()
       withViewTransitions(), // smooth page transitions
     ),
 
-    // ── HTTP ────────────────────────────────────────────────
+    // HTTP
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
 
-    // ── Animations ──────────────────────────────────────────
+    //  Animations
     provideAnimations(),
 
-    // ── NgRx Store ──────────────────────────────────────────
+    //  NgRx Store
     provideStore(reducers, { metaReducers }),
 
     provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects]),
@@ -56,7 +73,7 @@ export const appConfig: ApplicationConfig = {
       trace: false,
     }),
 
-    // ── Firebase ────────────────────────────────────────────
+    // Firebase
     provideFirebaseApp(() => initializeApp(environment.firebase)),
 
     provideAuth(() => {
@@ -70,7 +87,10 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideFirestore(() => {
-      const db = getFirestore();
+      // Initialize with proper settings
+      const db = initializeFirestore(initializeApp(environment.firebase), {
+        experimentalForceLongPolling: true, // Helps with emulators
+      });
       if (environment.useEmulators) {
         connectFirestoreEmulator(db, 'localhost', 8080);
       }
@@ -95,7 +115,7 @@ export const appConfig: ApplicationConfig = {
 
     provideMessaging(() => getMessaging()),
 
-    // ── PWA Service Worker ───────────────────────────────────
+    // PWA Service Worker
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

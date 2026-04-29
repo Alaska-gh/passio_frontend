@@ -5,7 +5,7 @@ import { schedulesReducer, SchedulesState } from './schedules/schedules.reducers
 import { ticketsReducer, TicketsState } from './tickets/tickets.reducers';
 import { busesReducer, BusesState } from './buses/buses.reducers';
 import { tripsReducer, TripsState } from './trips/trips.reducers';
-import { uiReducer, UiState } from './ui/ui.reducers';
+import { uiReducer, UiState } from './toast/ui.reducers';
 
 export interface AppState {
   auth: AuthState;

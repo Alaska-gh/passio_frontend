@@ -9,8 +9,16 @@ import {
   authState,
   User as FirebaseUser,
 } from '@angular/fire/auth';
-import { Firestore, doc, docData, setDoc, serverTimestamp } from '@angular/fire/firestore';
-import { Observable, from, switchMap, of, tap, catchError, throwError } from 'rxjs';
+import {
+  Firestore,
+  doc,
+  docData,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
+import { Observable, from, switchMap, of, tap, throwError, map, defer } from 'rxjs';
 import { User, UserRole } from '@core/interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -23,134 +31,136 @@ export class AuthService {
   private confirmationResult: ConfirmationResult | null = null;
   private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-  /**
-   * Emits the current Firebase user on every auth state change.
-   * Null means signed out.
-   */
   readonly firebaseUser$: Observable<FirebaseUser | null> = authState(this.auth);
 
-  /**
-   * Emits the full Firestore user profile whenever auth state changes.
-   * Null when signed out or profile not yet created.
-   */
   readonly currentUser$: Observable<User | null> = this.firebaseUser$.pipe(
     switchMap((firebaseUser) => {
       if (!firebaseUser) return of(null);
-      return docData(doc(this.firestore, 'users', firebaseUser.uid), {
-        idField: 'uid',
-      }) as Observable<User | null>;
+      return this.userDoc$(firebaseUser.uid);
     }),
   );
 
-  //  Step 1 — request an OTP.
+  sendOtp(phoneNumber: string): Observable<void> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        this.clearRecaptcha();
 
-  // sendOtp(phoneNumber: string) {
-  //   if (this.recaptchaVerifier) {
-  //     this.recaptchaVerifier.clear();
-  //     this.recaptchaVerifier = null;
-  //   }
-  //   const verifier = new RecaptchaVerifier(this.auth, 'recaptcha-container', {
-  //     size: 'invisible',
-  //   });
+        this.recaptchaVerifier = new RecaptchaVerifier(this.auth, 'recaptcha-container', {
+          size: 'invisible',
+        });
 
-  //   return from(signInWithPhoneNumber(this.auth, phoneNumber, verifier));
-  // }
-
-  sendOtp(phoneNumber: string) {
-    return runInInjectionContext(this.injector, () => {
-      if (this.recaptchaVerifier) {
-        this.recaptchaVerifier.clear();
-        this.recaptchaVerifier = null;
-      }
-
-      this.recaptchaVerifier = new RecaptchaVerifier(this.auth, 'recaptcha-container', {
-        size: 'invisible',
-      });
-
-      return from(signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier));
-    });
-  }
-  /**
-   * Step 2 — verify the OTP code.
-   * Returns an Observable that emits the User profile on success.
-   */
-  verifyOtp(code: string): Observable<User> {
-    if (!this.confirmationResult) {
-      return throwError(() => new Error('No active OTP session. Please request a new code.'));
-    }
-
-    return from(this.confirmationResult.confirm(code)).pipe(
-      switchMap((credential) =>
-        this.ensureUserProfile(credential.user).pipe(
-          switchMap(
-            () =>
-              docData(doc(this.firestore, 'users', credential.user.uid), {
-                idField: 'uid',
-              }) as Observable<User>,
-          ),
-        ),
-      ),
-      tap((user) => {
-        sessionStorage.removeItem('rgh_pending_phone');
-        this.redirectByRole(user.role);
+        return from(signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier)).pipe(
+          tap((confirmationResult) => {
+            this.confirmationResult = confirmationResult;
+            sessionStorage.setItem('rgh_pending_phone', phoneNumber);
+          }),
+          map(() => void 0),
+        );
       }),
-      catchError((err) => throwError(() => err)),
     );
   }
 
-  /**
-   * Sign the current user out.
-   */
-  signOut(): Observable<void> {
-    return from(signOut(this.auth)).pipe(tap(() => this.router.navigate(['/auth/login'])));
+  verifyOtp(code: string): Observable<User> {
+    if (!this.confirmationResult) {
+      return throwError(() => new Error('No active OTP session. Please resend'));
+    }
+
+    return defer(() =>
+      runInInjectionContext(this.injector, () =>
+        from(this.confirmationResult!.confirm(code)).pipe(
+          switchMap((credential) => {
+            const isNewUser =
+              credential.user.metadata.creationTime === credential.user.metadata.lastSignInTime;
+            return this.ensureUserProfile$(credential.user).pipe(
+              switchMap(() => this.userDoc$(credential.user.uid)),
+              map((user) => ({ ...user, isNewUser })),
+            );
+          }),
+          tap((user) => {
+            sessionStorage.removeItem('rgh_pending_phone');
+            this.redirectByRole(user.role, user.isNewUser);
+          }),
+        ),
+      ),
+    );
   }
 
-  /**
-   * Get a fresh Firebase ID token for HTTP calls.
-   */
-  getIdToken(): Observable<string | null> {
-    return new Observable<string | null>((subscriber) => {
-      const user = this.auth.currentUser;
-      if (!user) {
-        subscriber.next(null);
-        subscriber.complete();
-        return;
-      }
-      user
-        .getIdToken()
-        .then((token) => {
-          subscriber.next(token);
-          subscriber.complete();
-        })
-        .catch((err) => subscriber.error(err));
-    });
-  }
+  // Add to AuthService
 
-  // ── Private helpers ───────────────────────────────────────
-  private ensureUserProfile(firebaseUser: FirebaseUser): Observable<void> {
-    const ref = doc(this.firestore, 'users', firebaseUser.uid);
-    return (docData(ref) as Observable<User | undefined>).pipe(
-      switchMap((existing) => {
-        if (existing) return of(undefined);
+  updateProfile(uid: string, data: { name?: string; email?: string }): Observable<void> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const ref = doc(this.firestore, 'users', uid);
         return from(
-          setDoc(ref, {
-            uid: firebaseUser.uid,
-            phone: firebaseUser.phoneNumber ?? '',
-            role: 'customer' as UserRole,
-            createdAt: serverTimestamp(),
+          updateDoc(ref, {
+            ...(data.name && { name: data.name.trim() }),
+            ...(data.email && { email: data.email.trim() }),
+            updatedAt: serverTimestamp(),
           }),
         );
       }),
     );
   }
 
-  private redirectByRole(role: UserRole): void {
-    const destinations: Record<UserRole, string> = {
+  signOut(): Observable<void> {
+    return from(signOut(this.auth));
+  }
+
+  getIdToken(): Observable<string | null> {
+    return defer(async () => {
+      const user = this.auth.currentUser;
+      return user ? await user.getIdToken() : null;
+    });
+  }
+
+  private userDoc$(uid: string): Observable<User> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const ref = doc(this.firestore, 'users', uid);
+        return docData(ref, { idField: 'uid' }) as Observable<User>;
+      }),
+    );
+  }
+
+  private ensureUserProfile$(firebaseUser: FirebaseUser): Observable<void> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const ref = doc(this.firestore, 'users', firebaseUser.uid);
+
+        return from(getDoc(ref)).pipe(
+          switchMap((snap) => {
+            if (snap.exists()) return of(void 0);
+
+            return from(
+              setDoc(ref, {
+                uid: firebaseUser.uid,
+                phone: firebaseUser.phoneNumber ?? '',
+                role: 'customer',
+                name: firebaseUser.displayName,
+                createdAt: serverTimestamp(),
+              }),
+            );
+          }),
+        );
+      }),
+    );
+  }
+
+  private redirectByRole(role: UserRole, isNewUser = false): void {
+    const routes: Record<UserRole, string> = {
       customer: '/customer/routes',
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
     };
-    this.router.navigate([destinations[role]]);
+
+    this.router.navigate([routes[role]]);
+  }
+
+  private clearRecaptcha() {
+    if (this.recaptchaVerifier) {
+      this.recaptchaVerifier.clear();
+      this.recaptchaVerifier = null;
+    }
   }
 }

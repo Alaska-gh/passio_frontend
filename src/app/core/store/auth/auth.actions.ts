@@ -14,13 +14,22 @@ export const AuthActions = createActionGroup({
     'Verify Otp Success': props<{ user: User }>(),
     'Verify Otp Failure': props<{ error: string }>(),
 
+    'Resend Otp': props<{ phoneNumber: string }>(),
+    'Resend Otp Success': emptyProps(),
+    'Resend Otp Failure': props<{ error: string }>(),
+
     // Auth state change (Firebase listener)
     'User Authenticated': props<{ user: User }>(),
     'User Unauthenticated': emptyProps(),
 
+    'Update Profile': props<{ uid: string; name?: string; email?: string }>(),
+    'Update Profile Success': emptyProps(),
+    'Update Profile Failure': props<{ error: string }>(),
+
     // Sign out
     'Sign Out': emptyProps(),
     'Sign Out Success': emptyProps(),
+    'Sign Out Failure': emptyProps(),
 
     // Load profile
     'Load Profile': emptyProps(),

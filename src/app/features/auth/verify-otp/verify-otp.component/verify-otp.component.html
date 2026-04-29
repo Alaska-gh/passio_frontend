@@ -26,16 +26,18 @@
           (input)="onOtpInput($event, i)" (keydown.backspace)="onBackspace($event, i)" />
       </div>
 
+      <div id="recaptcha-container"></div>
       <!-- Verify Button -->
-      <p-button type="button" label="Verify OTP" styleClass="w-full"
-        class="bg-orange-600 text-white px-5 py-2 rounded-lg shadow hover:bg-orange-700" [loading]="loading"
+      <p-button type="button" label="Verify OTP"
+        styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700! w-full" [loading]="loading"
         (click)="verifyOtp()" [disabled]="otpForm.invalid"></p-button>
 
       <!-- Resend -->
       <div class="text-center mt-6 text-sm text-gray-600">
         Didn't receive code?
-        <p-button class="text-blue-600 font-medium ml-1" (click)="resendOtp()" [disabled]="resendDisabled">
-          Resend OTP
+        <p-button variant="text" severity="success" (click)="resendOtp()" [disabled]="resendDisabled"
+          label="Resend OTP">
+
         </p-button>
 
         <div *ngIf="resendDisabled" class="text-xs text-gray-400 mt-1">

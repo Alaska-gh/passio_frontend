@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { TripsActions } from './trips.actions';
-import { UiActions } from '../ui/ui.actions';
+import { UiActions } from '../toast/ui.actions';
 import { TripService } from '@core/services/trip.service';
 
 @Injectable()

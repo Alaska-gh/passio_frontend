@@ -1,0 +1,84 @@
+<div class="flex flex-col min-h-screen max-w-3xl mx-auto">
+
+  <!-- Header (cleaner + smaller) -->
+  <div class=" px-5 pt-10 pb-5">
+    <h1 class=" text-xl font-bold text-black">Browse Routes</h1>
+    <p class="text-sm mt-1 text-gray-900">
+      Find and select your travel route
+    </p>
+
+    <!-- Search -->
+    <div class="mt-4 grid md:grid-cols-3 gap-2">
+      <p-autocomplete [(ngModel)]="from" [suggestions]="filteredSources" [dropdown]="true" placeholder="From"
+        (completeMethod)="getFilterSources($event)"></p-autocomplete>
+      <p-autocomplete [(ngModel)]="to" [suggestions]="filteredDestinations" [dropdown]="true" placeholder="To"
+        (completeMethod)="getFilterDestinations($event)"></p-autocomplete>
+      <p-button icon="fas fa-magnifying-glass" label="Search"
+        styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700! w-full"></p-button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 px-4 py-5 space-y-4">
+
+    @if (routes$ | async; as routes) {
+
+    @if (routes.length === 0) {
+    <div class="flex flex-col items-center justify-center py-16 text-center gap-2">
+      <i class="pi pi-map text-4xl text-gray-300"></i>
+      <p class="text-gray-400 text-sm">No routes available</p>
+    </div>
+    }
+
+    @for (route of routes; track route.id) {
+    <p-card styleClass="rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer"
+      (click)="selectRoute(route.id)">
+
+      <!-- Top: Route path -->
+      <div class="flex items-center justify-between">
+
+        <div class="flex flex-col">
+          <span class="text-sm text-gray-500">From</span>
+          <span class="font-semibold text-gray-900">{{ route.origin }}</span>
+        </div>
+
+        <i class="pi pi-arrow-right text-gray-400"></i>
+
+        <div class="flex flex-col text-right">
+          <span class="text-sm text-gray-500">To</span>
+          <span class="font-semibold text-gray-900">{{ route.destination }}</span>
+        </div>
+
+      </div>
+
+      <!-- Bottom: key info -->
+      <div class="flex items-center justify-between mt-4 text-xs text-gray-600">
+
+        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+          GHS {{ route.fareGHS }}
+        </span>
+
+        <span>{{ route.estimatedDurationMin }} min</span>
+
+        <span>{{ route.distanceKm }} km</span>
+
+        @if (route.stops.length > 0) {
+        <span>{{ route.stops.length }} stops</span>
+        }
+
+      </div>
+
+    </p-card>
+    }
+
+    } @else {
+    @for (i of [1,2,3,4]; track i) {
+    <p-card styleClass="rounded-2xl">
+      <p-skeleton height="1rem" width="70%" />
+      <p-skeleton height="1rem" width="40%" class="mt-2" />
+    </p-card>
+    }
+    }
+
+  </div>
+</div>

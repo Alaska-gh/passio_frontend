@@ -1,6 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { UiActions } from '@core/store/ui/ui.actions';
+import { UiActions } from '@core/store/toast/ui.actions';
 import { Store } from '@ngrx/store';
 import { catchError, throwError } from 'rxjs';
 

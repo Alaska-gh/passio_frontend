@@ -5,6 +5,7 @@ export interface User {
   phone: string;
   name?: string;
   role: UserRole;
+  isNewUser?: boolean;
   createdAt: Date;
   fcmToken?: string;
 }

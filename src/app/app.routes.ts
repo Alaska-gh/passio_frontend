@@ -46,9 +46,11 @@ export const routes: Routes = [
   // },
 
   //  404 fallback
-  // {
-  //   path: '**',
-  //   loadComponent: () =>
-  //     import('./shared/components/not-found/not-found.component').then((m) => m.NotFoundComponent),
-  // },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./shared/components/not-found/not-found.component/not-found.component').then(
+        (m) => m.NotFoundComponent,
+      ),
+  },
 ];

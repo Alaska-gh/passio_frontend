@@ -1,21 +1,14 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of, from, fromEventPattern } from 'rxjs';
+import { of, Observable, defer } from 'rxjs';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
-import {
-  Auth,
-  signInWithPhoneNumber,
-  RecaptchaVerifier,
-  ConfirmationResult,
-  signOut,
-  onAuthStateChanged,
-} from '@angular/fire/auth';
-import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
+import { Auth, authState } from '@angular/fire/auth';
+import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { AuthActions } from './auth.actions';
-import { User, UserRole } from '@core/interfaces/user.interface';
-import { UiActions } from '../ui/ui.actions';
+import { User } from '@core/interfaces/user.interface';
 import { AuthService } from '@core/services/auth.service';
+import { UiActions } from '../toast/ui.actions';
 
 @Injectable()
 export class AuthEffects {
@@ -25,36 +18,35 @@ export class AuthEffects {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  private confirmationResult: ConfirmationResult | null = null;
-  private recaptchaVerifier: RecaptchaVerifier | null = null;
+  private injector = inject(Injector);
 
-  // ── Listen to Firebase auth state on app start ──────────
+  // Listen to Firebase auth state on app start
   initAuthListener$ = createEffect(() =>
-    fromEventPattern(
-      (handler) => onAuthStateChanged(this.auth, handler),
-      (_, unsubscribe) => unsubscribe,
-    ).pipe(
-      switchMap(async (firebaseUser: any) => {
+    defer(() => authState(this.auth)).pipe(
+      switchMap((firebaseUser) => {
         if (!firebaseUser) {
-          return AuthActions.userUnauthenticated();
+          return of(AuthActions.userUnauthenticated());
         }
-
-        const user = await this.loadProfile(firebaseUser.uid);
-
-        return user ? AuthActions.userAuthenticated({ user }) : AuthActions.userUnauthenticated();
+        return this.loadProfile(firebaseUser.uid).pipe(
+          map((user) =>
+            user ? AuthActions.userAuthenticated({ user }) : AuthActions.userUnauthenticated(),
+          ),
+        );
       }),
     ),
   );
 
-  // ── Send OTP ─────────────────────────────────────────────
+  // Send OTP
   sendOtp$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.sendOtp),
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
-          map((res) => {
-            console.log(res);
-
+          map(() => {
+            UiActions.showToast({
+              message: 'OTP sent successfully',
+              toastType: 'success',
+            });
             return AuthActions.sendOtpSuccess();
           }),
           catchError((err) =>
@@ -65,63 +57,86 @@ export class AuthEffects {
     ),
   );
 
-  sendOtpSuccess$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.sendOtpSuccess),
-        tap(() => this.router.navigate(['/auth/verify'])),
-      ),
-    { dispatch: false },
-  );
-
-  sendOtpFailure$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.sendOtpFailure),
-      map(({ error }) => UiActions.showToast({ message: error, toastType: 'error' })),
-    ),
-  );
-
-  // ── Verify OTP ───────────────────────────────────────────
+  // Verify OTP
   verifyOtp$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.verifyOtp),
       switchMap(({ code }) =>
-        from(this.doVerifyOtp(code)).pipe(
-          map((user) => AuthActions.verifyOtpSuccess({ user })),
-          catchError((err) =>
-            of(AuthActions.verifyOtpFailure({ error: this.friendlyAuthError(err) })),
-          ),
+        this.authService.verifyOtp(code).pipe(
+          map((user) => {
+            UiActions.showToast({
+              message: 'Your account is verified successfully',
+              toastType: 'success',
+            });
+
+            return AuthActions.verifyOtpSuccess({ user });
+          }),
+          catchError((err) => {
+            UiActions.showToast({
+              message: err,
+              toastType: 'error',
+            });
+            return of(AuthActions.verifyOtpFailure({ error: this.friendlyAuthError(err) }));
+          }),
         ),
       ),
     ),
   );
 
-  verifyOtpSuccess$ = createEffect(() =>
+  resendOtp$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.verifyOtpSuccess),
-      tap(({ user }) => {
-        sessionStorage.removeItem('rgh_pending_phone');
-        this.redirectByRole(user.role);
-      }),
-      map(() => UiActions.showToast({ message: 'Welcome to RouteGH!', toastType: 'success' })),
+      ofType(AuthActions.resendOtp),
+      switchMap(({ phoneNumber }) =>
+        this.authService.sendOtp(phoneNumber).pipe(
+          map(() => {
+            UiActions.showToast({
+              message: `We have successfully resent the OTP to ${phoneNumber}`,
+              toastType: 'success',
+            });
+            return AuthActions.resendOtpSuccess();
+          }),
+          catchError((err) => {
+            UiActions.showToast({
+              message: `failled to resent OTP to ${phoneNumber}. Please try again`,
+              toastType: 'success',
+            });
+            return of(AuthActions.resendOtpFailure({ error: this.friendlyAuthError(err) }));
+          }),
+        ),
+      ),
+    ),
+  );
+  updateProfile$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.updateProfile),
+      switchMap(({ uid, name, email }) =>
+        this.authService.updateProfile(uid, { name, email }).pipe(
+          map(() => AuthActions.updateProfileSuccess()),
+          catchError((err) => of(AuthActions.updateProfileFailure({ error: err.message }))),
+        ),
+      ),
     ),
   );
 
-  verifyOtpFailure$ = createEffect(() =>
+  updateProfileSuccess$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.verifyOtpFailure),
-      map(({ error }) => UiActions.showToast({ message: error, toastType: 'error' })),
+      ofType(AuthActions.updateProfileSuccess),
+      map(() =>
+        UiActions.showToast({
+          message: 'Profile updated successfully',
+          toastType: 'success',
+        }),
+      ),
     ),
   );
-
-  // ── Sign out ─────────────────────────────────────────────
+  // Sign out
   signOut$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.signOut),
       switchMap(() =>
-        from(signOut(this.auth)).pipe(
+        this.authService.signOut().pipe(
           map(() => AuthActions.signOutSuccess()),
-          catchError(() => of(AuthActions.signOutSuccess())),
+          catchError(() => of(AuthActions.signOutFailure())),
         ),
       ),
     ),
@@ -136,64 +151,15 @@ export class AuthEffects {
     { dispatch: false },
   );
 
-  // ── Private helpers ──────────────────────────────────────
-  // private async doSendOtp(phoneNumber: string): Promise<void> {
-  //   this.recaptchaVerifier?.clear();
-  //   const btn = document.getElementById('otp-btn') as HTMLElement;
-  //   this.recaptchaVerifier = new RecaptchaVerifier(this.auth, btn, {
-  //     size: 'invisible',
-  //     callback: () => {},
-  //   });
-  //   this.confirmationResult = await signInWithPhoneNumber(
-  //     this.auth,
-  //     phoneNumber,
-  //     this.recaptchaVerifier,
-  //   );
-  //   sessionStorage.setItem('rgh_pending_phone', phoneNumber);
-  //   console.log(this.confirmationResult);
-  //   console.log(this.recaptchaVerifier);
-  //   console.log(phoneNumber);
-  // }
-
-  private async doVerifyOtp(code: string): Promise<User> {
-    if (!this.confirmationResult) {
-      throw new Error('No active OTP session.');
-    }
-    const credential = await this.confirmationResult.confirm(code);
-    const uid = credential.user.uid;
-    const phone = credential.user.phoneNumber ?? '';
-
-    // Create profile if first login
-    const ref = doc(this.firestore, 'users', uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await setDoc(ref, {
-        uid,
-        phone,
-        role: 'customer' as UserRole,
-        createdAt: serverTimestamp(),
-      });
-    }
-
-    const profile = await this.loadProfile(uid);
-    if (!profile) throw new Error('Could not load user profile.');
-    return profile;
-  }
-
-  private async loadProfile(uid: string): Promise<User | null> {
-    const snap = await getDoc(doc(this.firestore, 'users', uid));
-    if (!snap.exists()) return null;
-    return { uid, ...snap.data() } as User;
-  }
-
-  private redirectByRole(role: UserRole): void {
-    const destinations: Record<UserRole, string> = {
-      customer: '/customer/routes',
-      admin: '/admin/dashboard',
-      driver: '/driver/schedule',
-      conductor: '/conductor/scanner',
-    };
-    this.router.navigate([destinations[role]]);
+  private loadProfile(uid: string): Observable<User | null> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => getDoc(doc(this.firestore, 'users', uid))),
+    ).pipe(
+      map((snap) => {
+        if (!snap.exists()) return null;
+        return { uid, ...snap.data() } as User;
+      }),
+    );
   }
 
   private friendlyAuthError(err: any): string {

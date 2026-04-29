@@ -1,18 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthActions } from '@core/store/auth/auth.actions';
 import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/auth/auth.selectors';
 import { Store } from '@ngrx/store';
 import { ButtonModule } from 'primeng/button';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-login-component',
@@ -20,10 +15,10 @@ import { Observable, Subject } from 'rxjs';
   templateUrl: './login-component.html',
   styleUrl: './login-component.css',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loading$!: Observable<boolean>;
-  error$!: Observable<string | null>;
-  otpSent$!: Observable<boolean>;
+  error!: string | null;
+  otpSent!: boolean;
 
   @ViewChild('otpBtn', { read: ElementRef })
   otpBtn!: ElementRef<HTMLElement>;
@@ -31,6 +26,7 @@ export class LoginComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<void>();
+  private router = inject(Router);
 
   form = this.fb.group({
     phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9,10}$/)]],
@@ -38,8 +34,22 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading$ = this.store.select(selectAuthLoading);
-    this.error$ = this.store.select(selectAuthError);
-    this.otpSent$ = this.store.select(selectOtpSent);
+    this.store
+      .select(selectAuthError)
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((err) => (this.error = err)),
+      )
+      .subscribe();
+
+    this.store
+      .select(selectOtpSent)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((sent) => {
+        if (sent) {
+          this.router.navigate(['/auth/verify']);
+        }
+      });
   }
 
   get phoneControl(): AbstractControl {

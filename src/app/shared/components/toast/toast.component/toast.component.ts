@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { UiActions } from '@core/store/ui/ui.actions';
-import { ToastMessage } from '@core/store/ui/ui.reducers';
-import { selectToasts } from '@core/store/ui/ui.selectors';
+import { UiActions } from '@core/store/toast/ui.actions';
+import { ToastMessage } from '@core/store/toast/ui.reducers';
+import { selectToasts } from '@core/store/toast/ui.selectors';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 

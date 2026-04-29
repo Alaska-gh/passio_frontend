@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { Button } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-customer-home.componet',
-  imports: [Button],
+  imports: [Button, RouterOutlet, CardModule],
   templateUrl: './customer-home.componet.html',
   styleUrl: './customer-home.componet.css',
 })
