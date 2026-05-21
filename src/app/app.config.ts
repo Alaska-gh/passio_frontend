@@ -31,10 +31,10 @@ import { SchedulesEffects } from '@core/store/schedules/schedules.effects';
 import { TicketsEffects } from '@core/store/tickets/tickets.effects';
 import { BusesEffects } from '@core/store/buses/buses.effects';
 import { TripsEffects } from '@core/store/trips/trips.effects';
-import { environment } from 'src/environments/environment.dev';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { environment } from '@env/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [

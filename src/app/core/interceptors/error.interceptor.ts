@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { UiActions } from '@core/store/toast/ui.actions';
+import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
+import { SHOW_TOAST } from '@core/store/toast/toast.actions';
 import { Store } from '@ngrx/store';
 import { catchError, throwError } from 'rxjs';
 
@@ -16,7 +17,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       if (err.status === 404) message = 'The requested resource was not found.';
       if (err.status === 0) message = 'Network error. Check your connection.';
 
-      store.dispatch(UiActions.showToast({ message, toastType: 'error' }));
+      store.dispatch(SHOW_TOAST({
+        title:'',
+         message, 
+         severity: ToastSeverity.ERROR }));
 
       return throwError(() => err);
     }),

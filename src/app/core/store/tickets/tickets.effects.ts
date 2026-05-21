@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
-import { UiActions } from '../toast/ui.actions';
 import { TicketsActions } from './tickets.action';
 import { TicketService } from '@core/services/ticket.service';
+import { SHOW_TOAST } from '../toast/toast.actions';
+import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Injectable()
 export class TicketsEffects {
@@ -43,14 +44,22 @@ export class TicketsEffects {
     this.actions$.pipe(
       ofType(TicketsActions.purchaseTicketSuccess),
       tap(({ result }) => this.router.navigate(['/customer/ticket', result.ticketId])),
-      map(() => UiActions.showToast({ message: 'Ticket purchased!', toastType: 'success' })),
+      map(() => SHOW_TOAST({
+         title:'',
+         message: 'Ticket purchased!', 
+         severity: ToastSeverity.SUCCESS 
+        })),
     ),
   );
 
   purchaseTicketFailure$ = createEffect(() =>
     this.actions$.pipe(
       ofType(TicketsActions.purchaseTicketFailure),
-      map(({ error }) => UiActions.showToast({ message: error, toastType: 'error' })),
+      map(({ error }) => SHOW_TOAST({
+         title: '',
+         message: error, 
+         severity: ToastSeverity.ERROR
+         })),
     ),
   );
 
