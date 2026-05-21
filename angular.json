@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "passio_fronten": {
+    "passio-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -25,7 +25,8 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ]
           },
           "configurations": {
@@ -42,7 +43,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
@@ -56,10 +58,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "passio_fronten:build:production"
+              "buildTarget": "passio-frontend:build:production"
             },
             "development": {
-              "buildTarget": "passio_fronten:build:development"
+              "buildTarget": "passio-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

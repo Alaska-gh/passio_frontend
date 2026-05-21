@@ -1,0 +1,126 @@
+<div class="w-full">
+  <!--  Hero Section -->
+  <div class="relative h-[85vh] flex items-center">
+
+    <!-- Background Image -->
+    <img src="images/hero-image.jpg" alt="Hero Section Background"
+      class="absolute inset-0 w-full h-full object-cover" />
+
+    <!-- Gradient Overlay -->
+    <div class="absolute inset-0 bg-linear-to-r from-black/80 via-black/60 to-transparent backdrop-blur-sm"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-8 text-white">
+      <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+        Travel Smart. Book Fast<br />
+        Move Easy.
+      </h1>
+
+      <p class="mt-4 max-w-lg text-gray-200">
+        Plan your journey with ease. book tickets in seconds and enjoy a smoother, more reliable travel experience
+        across
+        Ghana.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex gap-4 mt-6">
+        <p-button styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700!"
+          label="Book Your Ticket Now" />
+        <p-button styleClass="text-white! hover:bg-orange-700! border! border-orange-600! bg-transparent!"
+          label="View Available Routes" />
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  class="w-full rounded-lg bg-linear-to-r from-amber-200 to-orange-300 p-6 max-w-7xl mx-auto mt-4 justify-center items-center">
+  <div class="flex flex-col justify-center items-center gap-2">
+    <h1 class="text-3xl font-bold">Why Choose Passio<span class="text-orange-600 text-4xl">.</span>?</h1>
+    <p class="text-gray-800">Experience the future of bus ticketing in Ghana</p>
+  </div>
+
+  <div class="grid md:grid-cols-4 gap-2 mt-4">
+    <p-card
+      styleClass="w-full overflow-hidden text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+
+      <ng-template #header>
+        <div class="flex flex-col items-center pt-4 gap-2">
+          <div class="rounded-xl bg-amber-500 w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-clock text-white text-xl"></i>
+          </div>
+          <div class="font-semibold text-lg">
+            24/7 Booking
+          </div>
+        </div>
+      </ng-template>
+
+      <p class="-mt-2 text-gray-500">
+        Book anytime, anywhere - no need to visit the terminal
+      </p>
+
+    </p-card>
+    <p-card
+      styleClass="w-full overflow-hidden text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+
+      <ng-template #header>
+        <div class="flex flex-col items-center pt-4 gap-2">
+          <div class="rounded-xl bg-blue-500 w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-calendar-alt text-white text-xl"></i>
+          </div>
+          <div class="font-semibold text-lg">
+            Seat Selection
+          </div>
+        </div>
+      </ng-template>
+
+      <p class="-mt-2 text-gray-500">
+        Choose your preferred seat with our interactive seat map
+      </p>
+
+    </p-card>
+    <p-card
+      styleClass="w-full overflow-hidden text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+
+      <ng-template #header>
+        <div class="flex flex-col items-center pt-4 gap-2">
+          <div class="rounded-xl bg-green-500 w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-wallet text-white text-xl"></i>
+          </div>
+          <div class="font-semibold text-lg">
+            Mobile Money
+          </div>
+        </div>
+      </ng-template>
+
+      <p class="-mt-2 text-gray-500">
+        Pay instantly with MTN, Vodafone Cash, or AirtelTigo
+      </p>
+
+    </p-card>
+    <p-card
+      styleClass="w-full overflow-hidden text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+
+      <ng-template #header>
+        <div class="flex flex-col items-center pt-4 gap-2">
+          <div class="rounded-xl bg-pink-500 w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-ticket-alt text-white text-xl"></i>
+          </div>
+          <div class="font-semibold text-lg">
+            E-Ticket
+          </div>
+        </div>
+      </ng-template>
+
+      <p class="-mt-2 text-gray-500">
+        Receive digital tickets instantly via SMS & email
+      </p>
+
+    </p-card>
+
+  </div>
+</div>
+
+<router-outlet></router-outlet>

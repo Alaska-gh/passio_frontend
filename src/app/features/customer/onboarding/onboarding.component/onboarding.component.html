@@ -1,0 +1,68 @@
+<p-dialog [visible]="(visible$ | async) ?? false" [modal]="true" [closable]="false" [dismissableMask]="false"
+  [style]="{ width: '420px' }" styleClass="rounded-2xl overflow-hidden">
+
+  <div class="px-6 py-7 flex flex-col gap-6">
+
+    <!-- Header -->
+    <div class="flex flex-col items-center text-center gap-3">
+      <div
+        class="w-14 h-14 rounded-xl bg-primary-900 flex items-center justify-center text-white font-semibold text-lg shadow">
+        RGH
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">
+          Complete your profile
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">
+          This helps personalize your experience
+        </p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+
+      <!-- Name -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">
+          Full name
+        </label>
+
+        <input pInputText formControlName="name" placeholder="Kofi Mensah" class="w-full" />
+
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+        <p-message severity="error" text="Enter a valid name" styleClass="text-sm" />
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700">
+          Email <span class="text-gray-400">(optional)</span>
+        </label>
+
+        <input pInputText formControlName="email" placeholder="kofi@example.com" class="w-full" />
+
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p-message severity="error" text="Invalid email" styleClass="text-sm" />
+        }
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col gap-2 mt-3">
+
+        <p-button type="submit" label="Continue" styleClass="w-full" size="large"
+          [loading]="(loading$ | async) ?? false" />
+
+        <button type="button" class="text-sm text-gray-400 hover:text-gray-600 transition" (click)="skip()">
+          Skip for now
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</p-dialog>

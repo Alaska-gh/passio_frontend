@@ -1,0 +1,40 @@
+<div class="bg-orange-600 text-white text-sm py-2 px-6 flex justify-between items-center">
+  <div class="flex gap-4">
+    <span><i class="fab fa-instagram"></i></span>
+    <span><i class="fab fa-x-twitter"></i></span>
+    <span><i class="fab fa-tiktok"></i></span>
+  </div>
+
+  <div class="flex gap-6">
+    <span><i class="fas fa-clock"></i> Mon-sat 08:00-18:00</span>
+    <span><i class="fas fa-phone"></i> +233545519634</span>
+    <span><i class="fas fa-email"></i> alaska@email.com</span>
+  </div>
+</div>
+
+<!-- 🔷 Navbar -->
+<div class="bg-white shadow-md px-8 py-2 flex justify-between items-center">
+  <h1 class="text-xl font-bold text-gray-800 cursor-pointer">Passio<span class="text-orange-600 text-4xl">.</span></h1>
+  <nav class="hidden md:flex gap-8 text-gray-600 font-medium">
+    <a routerLink="/customer/routes" routerLinkActive="text-orange-600">
+      Routes
+    </a>
+    <a routerLink="/customer/tickets" routerLinkActive="text-orange-600">
+      Tickets
+    </a>
+  </nav>
+
+  <ng-container *ngIf="isAuthenticated; else loginBtn">
+    <div class="flex gap-4 items-center">
+      Hi {{userName || 'Traveller' }}
+      <p-button icon="fas fa-right-from-bracket" [text]="true" severity="danger" (onClick)="signOut()"></p-button>
+    </div>
+
+  </ng-container>
+
+  <ng-template #loginBtn>
+    <p-button routerLink="/auth/login" label="Get Started"
+      styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700!">
+    </p-button>
+  </ng-template>
+</div>

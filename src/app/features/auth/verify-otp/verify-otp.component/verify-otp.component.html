@@ -1,0 +1,50 @@
+<div class="h-[85vh] flex items-center justify-center bg-gray-100">
+  <div class="w-full max-w-6xl grid md:grid-cols-2 bg-white rounded-2xl overflow-hidden">
+    <div class="relative hidden md:block">
+      <img src="images/toyota_hiace_cars.png" alt="login page" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-black/40"></div>
+
+      <div class="absolute bottom-8 left-8 text-white">
+        <h2 class="text-2xl font-bold">Travel with Ease</h2>
+        <p class="text-sm text-gray-200">Manage your bookings seamlessly</p>
+      </div>
+    </div>
+
+    <div class="p-8 md:p-12 flex flex-col justify-center">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Verify OTP</h1>
+        <p class="text-sm text-gray-500 mt-1">
+          Enter the 6-digit code sent to your phone
+        </p>
+      </div>
+
+      <!-- OTP Inputs -->
+      <div class="flex justify-between gap-2 mb-6">
+        <input *ngFor="let ctrl of otpControls; let i = index" pInputText inputmode="numeric" maxlength="1"
+          class="w-12 h-12 text-center text-lg border rounded-lg focus:border-none" [formControl]="ctrl"
+          (input)="onOtpInput($event, i)" (keydown.backspace)="onBackspace($event, i)" />
+      </div>
+
+      <div id="recaptcha-container"></div>
+      <!-- Verify Button -->
+      <p-button type="button" label="Verify OTP"
+        styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700! w-full" [loading]="loading"
+        (click)="verifyOtp()" [disabled]="otpForm.invalid"></p-button>
+
+      <!-- Resend -->
+      <div class="text-center mt-6 text-sm text-gray-600">
+        Didn't receive code?
+        <p-button variant="text" severity="success" (click)="resendOtp()" [disabled]="resendDisabled"
+          label="Resend OTP">
+
+        </p-button>
+
+        <div *ngIf="resendDisabled" class="text-xs text-gray-400 mt-1">
+          Resend available in {{ countdown }}s
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
