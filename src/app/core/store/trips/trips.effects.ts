@@ -3,8 +3,9 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { TripsActions } from './trips.actions';
-import { UiActions } from '../toast/ui.actions';
 import { TripService } from '@core/services/trip.service';
+import { SHOW_TOAST } from '../toast/toast.actions';
+import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Injectable()
 export class TripsEffects {
@@ -41,9 +42,10 @@ export class TripsEffects {
     this.actions$.pipe(
       ofType(TripsActions.recordReturnSuccess),
       map(({ result }) =>
-        UiActions.showToast({
+        SHOW_TOAST({
+          title: '',
           message: result.message,
-          toastType: 'success',
+          severity: ToastSeverity.SUCCESS,
         }),
       ),
     ),
@@ -52,7 +54,11 @@ export class TripsEffects {
   recordReturnFailure$ = createEffect(() =>
     this.actions$.pipe(
       ofType(TripsActions.recordReturnFailure),
-      map(({ error }) => UiActions.showToast({ message: error, toastType: 'error' })),
+      map(({ error }) => SHOW_TOAST
+      ({ 
+        title:'',
+        message: error, 
+        severity: ToastSeverity.ERROR })),
     ),
   );
 }

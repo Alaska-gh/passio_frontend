@@ -8,7 +8,8 @@ import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { AuthActions } from './auth.actions';
 import { User } from '@core/interfaces/user.interface';
 import { AuthService } from '@core/services/auth.service';
-import { UiActions } from '../toast/ui.actions';
+import { SHOW_TOAST } from '../toast/toast.actions';
+import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Injectable()
 export class AuthEffects {
@@ -43,9 +44,10 @@ export class AuthEffects {
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
           map(() => {
-            UiActions.showToast({
+            SHOW_TOAST({
+              title: '',
               message: 'OTP sent successfully',
-              toastType: 'success',
+              severity: ToastSeverity.SUCCESS,
             });
             return AuthActions.sendOtpSuccess();
           }),
@@ -64,17 +66,19 @@ export class AuthEffects {
       switchMap(({ code }) =>
         this.authService.verifyOtp(code).pipe(
           map((user) => {
-            UiActions.showToast({
+            SHOW_TOAST({
+              title: '',
               message: 'Your account is verified successfully',
-              toastType: 'success',
+              severity: ToastSeverity.SUCCESS,
             });
 
             return AuthActions.verifyOtpSuccess({ user });
           }),
           catchError((err) => {
-            UiActions.showToast({
+            SHOW_TOAST({
+              title: '',
               message: err,
-              toastType: 'error',
+              severity: ToastSeverity.ERROR,
             });
             return of(AuthActions.verifyOtpFailure({ error: this.friendlyAuthError(err) }));
           }),
@@ -89,16 +93,18 @@ export class AuthEffects {
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
           map(() => {
-            UiActions.showToast({
+            SHOW_TOAST({
+              title: '',
               message: `We have successfully resent the OTP to ${phoneNumber}`,
-              toastType: 'success',
+              severity:ToastSeverity.SUCCESS,
             });
             return AuthActions.resendOtpSuccess();
           }),
           catchError((err) => {
-            UiActions.showToast({
+            SHOW_TOAST({
+              title:'',
               message: `failled to resent OTP to ${phoneNumber}. Please try again`,
-              toastType: 'success',
+              severity: ToastSeverity.ERROR,
             });
             return of(AuthActions.resendOtpFailure({ error: this.friendlyAuthError(err) }));
           }),
@@ -122,9 +128,10 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.updateProfileSuccess),
       map(() =>
-        UiActions.showToast({
+        SHOW_TOAST({
+          title: '',
           message: 'Profile updated successfully',
-          toastType: 'success',
+          severity: ToastSeverity.SUCCESS,
         }),
       ),
     ),
