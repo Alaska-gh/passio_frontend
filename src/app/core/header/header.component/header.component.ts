@@ -11,11 +11,14 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 import { UserRole } from '@core/interfaces';
 import { CommonModule } from '@angular/common';
+import { AvatarModule } from 'primeng/avatar';
+import { MenuModule } from 'primeng/menu';
 import { AuthActions } from '@core/store/auth/auth.actions';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-header',
-  imports: [Button, RouterLink, RouterLinkActive, CommonModule],
+  imports: [Button, RouterLink, RouterLinkActive, CommonModule, AvatarModule, MenuModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
@@ -24,9 +27,36 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   userRole: UserRole | null = null;
   userName: string | null = null;
+  items: MenuItem[] | undefined
+
+
   private store = inject(Store);
 
   ngOnInit(): void {
+    this.items = [
+      {
+        label: 'Profile Settings',
+        items: [
+          {
+            label: 'Update Profile',
+            icon: 'fas fa-user-plus'
+          },
+          {
+             separator: true
+          },
+          {
+            label: 'Signout',
+            icon: 'fas fa-sign-out',
+            shortcut: '⌘+Q',
+            linkClass: '!text-red-500 dark:!text-red-400',
+            command: () => {
+              this.signOut()
+            }
+          }
+        ],
+    }
+  ]
+
     this.store
       .select(selectIsAuthenticated)
       .pipe(takeUntil(this.destroy$))
