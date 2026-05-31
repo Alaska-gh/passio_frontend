@@ -36,6 +36,7 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { environment } from '@env/environment';
 import { MessageService } from 'primeng/api';
+import { ToastEffects } from '@core/store/toast/toast.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -68,7 +69,7 @@ export const appConfig: ApplicationConfig = {
     //  NgRx Store
     provideStore(reducers, { metaReducers }),
 
-    provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects]),
+    provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects, ToastEffects]),
 
     // Redux DevTools — only in dev mode
     provideStoreDevtools({
