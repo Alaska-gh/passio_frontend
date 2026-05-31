@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-customer-routes.component',
+  standalone: true,
   imports: [
     CommonModule,
     CardModule,

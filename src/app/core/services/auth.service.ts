@@ -148,7 +148,7 @@ export class AuthService {
 
   private redirectByRole(role: UserRole, isNewUser = false): void {
     const routes: Record<UserRole, string> = {
-      customer: '/customer/routes',
+      customer: '/customer/home',
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
