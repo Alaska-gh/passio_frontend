@@ -33,9 +33,6 @@
         @if (phoneControl.touched && phoneControl.hasError('pattern')) {
         <span class="text-red-600 text-sm mx-auto">Enter a valid Ghana mobile number</span>
         }
-
-        <div id="recaptcha-container"></div>
-
         <p-button id="otp-btn" type="submit" label="Send OTP"
           styleClass="!bg-orange-600 !text-white !border-none hover:!bg-orange-700 w-full"
           [loading]="(loading$ | async) ?? false" [disabled]="(loading$ | async) ?? false" />

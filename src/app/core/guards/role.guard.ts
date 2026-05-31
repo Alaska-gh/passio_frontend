@@ -20,6 +20,7 @@ export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
+      cashier: '/cashier/issue-ticket'
     };
 
     return store.select(selectUserRole).pipe(

@@ -25,7 +25,9 @@ export class AuthEffects {
 
   // Listen to Firebase auth state on app start
   initAuthListener$ = createEffect(() =>
-    defer(() => authState(this.auth)).pipe(
+    defer(() =>
+    runInInjectionContext(this.injector, () => authState(this.auth))
+    ).pipe(
       switchMap((firebaseUser) => {
         if (!firebaseUser) {
           return of(AuthActions.userUnauthenticated());

@@ -38,6 +38,7 @@ import { environment } from '@env/environment';
 import { MessageService } from 'primeng/api';
 import { ToastEffects } from '@core/store/toast/toast.effects';
 import { ActiveRouteEffects } from '@core/store/routes/route.effects';
+import { getApp } from 'firebase/app';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -68,7 +69,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
 
     //  NgRx Store
-    provideStore(reducers, { metaReducers }),
+    provideStore(reducers, { metaReducers }), 
 
     provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects, ToastEffects, ActiveRouteEffects]),
 
@@ -85,24 +86,11 @@ export const appConfig: ApplicationConfig = {
 
     provideAuth(() => {
       const auth = getAuth();
-      if (environment.useEmulators) {
-        connectAuthEmulator(auth, 'http://localhost:9099', {
-          disableWarnings: true,
-        });
-      }
       return auth;
     }),
 
-    provideFirestore(() => {
-      // Initialize with proper settings
-      const db = initializeFirestore(initializeApp(environment.firebase), {
-        experimentalForceLongPolling: true, // Helps with emulators
-      });
-      if (environment.useEmulators) {
-        connectFirestoreEmulator(db, 'localhost', 8080);
-      }
-      return db;
-    }),
+    provideFirestore(() => getFirestore(getApp())),
+    
 
     provideFunctions(() => {
       const fns = getFunctions();

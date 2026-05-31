@@ -4,11 +4,14 @@ service cloud.firestore {
 
     function isSignedIn()  { return request.auth != null; }
     function uid()         { return request.auth.uid; }
-    function userDoc()     { return get(/databases/$(database)/documents/users/$(uid())).data; }
-    function role()        { return isSignedIn() ? userDoc().role : null; }
+     function userDoc()     { return exists(/databases/$(database)/documents/users/$(uid())) ?
+      get(/databases/$(database)/documents/users/$(uid())).data : null; 
+    }
+    function role()        { return isSignedIn() && userDoc() != null ? userDoc().role : null; }
     function isAdmin()     { return role() == 'admin'; }
     function isDriver()    { return role() == 'driver'; }
     function isConductor() { return role() == 'conductor'; }
+    function isCashier() { return role() == 'cashier'; }
     function isOwner(userId) { return isSignedIn() && uid() == userId; }
 
     match /users/{userId} {
@@ -35,8 +38,10 @@ service cloud.firestore {
     }
 
     match /tickets/{ticketId} {
-      allow read:                   if isOwner(resource.data.customerId) || isAdmin() || isConductor();
-      allow create, update, delete: if false;
+      allow read:   if isOwner(resource.data.customerId) || isAdmin() || isConductor() || isCashier();
+      allow create: if isCashier() || isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
     }
 
     match /trips/{tripId} {
