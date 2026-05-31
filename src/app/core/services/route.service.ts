@@ -11,8 +11,8 @@ import {
   where,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import { Observable, from } from 'rxjs';
-import { BusRoute } from '@core/interfaces/route.interface';
+import { Observable, delay, from, of } from 'rxjs';
+import { BusRoute, RouteStop } from '@core/interfaces/route.interface';
 
 @Injectable({ providedIn: 'root' })
 export class RouteService {
@@ -20,6 +20,37 @@ export class RouteService {
   private injector = inject(Injector);
   /** Real-time stream of all active routes */
   getActiveRoutes(): Observable<BusRoute[]> {
+    const useMock = true;
+
+  if (useMock) {
+    return of([
+      {
+        id: '1',
+        origin: ['Accra'],
+        destination: ['Kumasi'],
+        stops: [
+          { name: 'Nsawam' },
+          { name: 'Nkawkaw' }
+        ] as RouteStop[],
+        distanceKm: 250,
+        estimatedDurationMin: 240,
+        fareGHS: 120,
+        active: true,
+        destinationLat: 6.6885,
+        destinationLng: -1.6244
+      },
+      {
+        id: '2',
+        origin: ['Accra'],
+        destination: ['Takoradi'],
+        stops: [],
+        distanceKm: 220,
+        estimatedDurationMin: 210,
+        fareGHS: 100,
+        active: true
+      }
+    ]).pipe(delay(500));
+   }
     return runInInjectionContext(this.injector, () => {
       const routesRef = collection(this.firestore, 'routes');
       const q = query(routesRef, where('active', '==', true));

@@ -13,6 +13,9 @@ import { Router } from '@angular/router';
 import { BusRoute } from '@core/interfaces';
 import { Observable } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { selectActiveRoutes } from '@core/store/routes/route.selectors';
+import { GET_ACTIVE_ROUTES } from '@core/store/routes/route.actions';
 
 @Component({
   selector: 'app-customer-routes.component',
@@ -40,19 +43,22 @@ export class CustomerRoutesComponent implements OnInit {
   from: string | undefined;
   to: string | undefined;
 
-  private routeService = inject(RouteService);
   private router = inject(Router);
+  private store = inject(Store)
 
   routes$!: Observable<BusRoute[]>;
   today = new Date().toISOString().slice(0, 10);
 
   ngOnInit(): void {
-    this.routes$ = this.routeService.getActiveRoutes();
+    console.log('dispatiching routes');
+    
+    this.store.dispatch(GET_ACTIVE_ROUTES())
+    this.routes$ = this.store.select(selectActiveRoutes);
+
   }
 
   getFilterSources(event: any) {
     const query = event.query.toLowerCase();
-
     this.filteredSources = this.sources.filter((item) => item.toLowerCase().includes(query));
   }
 

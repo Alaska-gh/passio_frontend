@@ -5,8 +5,8 @@ export interface RouteStop {
 
 export interface BusRoute {
   id: string;
-  origin: string;
-  destination: string;
+  origin: string[];
+  destination: string[];
   stops: RouteStop[];
   distanceKm: number;
   estimatedDurationMin: number;

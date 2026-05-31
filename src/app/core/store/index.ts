@@ -5,6 +5,7 @@ import { schedulesReducer, SchedulesState } from './schedules/schedules.reducers
 import { ticketsReducer, TicketsState } from './tickets/tickets.reducers';
 import { busesReducer, BusesState } from './buses/buses.reducers';
 import { tripsReducer, TripsState } from './trips/trips.reducers';
+import { activeRoutesReducer, activeRouteState } from './routes/route.reducer';
 
 export interface AppState {
   auth: AuthState;
@@ -12,6 +13,7 @@ export interface AppState {
   tickets: TicketsState;
   buses: BusesState;
   trips: TripsState;
+  routes: activeRouteState
 }
 
 export const reducers: ActionReducerMap<AppState> = {
@@ -20,6 +22,7 @@ export const reducers: ActionReducerMap<AppState> = {
   tickets: ticketsReducer,
   buses: busesReducer,
   trips: tripsReducer,
+  routes: activeRoutesReducer
 };
 
 export const metaReducers: MetaReducer<AppState>[] = isDevMode() ? [] : [];
