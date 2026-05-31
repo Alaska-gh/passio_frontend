@@ -26,8 +26,8 @@ export class RouteService {
     return of([
       {
         id: '1',
-        origin: ['Accra'],
-        destination: ['Kumasi'],
+        origin: 'Accra',
+        destination: 'Kumasi',
         stops: [
           { name: 'Nsawam' },
           { name: 'Nkawkaw' }
@@ -41,8 +41,8 @@ export class RouteService {
       },
       {
         id: '2',
-        origin: ['Accra'],
-        destination: ['Takoradi'],
+        origin: 'Accra',
+        destination: 'Takoradi',
         stops: [],
         distanceKm: 220,
         estimatedDurationMin: 210,
