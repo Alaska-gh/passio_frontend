@@ -10,6 +10,7 @@ import { User } from '@core/interfaces/user.interface';
 import { AuthService } from '@core/services/auth.service';
 import { SHOW_TOAST } from '../toast/toast.actions';
 import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class AuthEffects {
@@ -20,6 +21,7 @@ export class AuthEffects {
   private authService = inject(AuthService);
 
   private injector = inject(Injector);
+  private store = inject(Store);
 
   // Listen to Firebase auth state on app start
   initAuthListener$ = createEffect(() =>
@@ -44,11 +46,13 @@ export class AuthEffects {
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
           map(() => {
-            SHOW_TOAST({
-              title: '',
+           this.store.dispatch(
+             SHOW_TOAST({
+              title: 'OTP Sent',
               message: 'OTP sent successfully',
               severity: ToastSeverity.SUCCESS,
-            });
+            })
+           )
             return AuthActions.sendOtpSuccess();
           }),
           catchError((err) =>
@@ -65,18 +69,19 @@ export class AuthEffects {
       ofType(AuthActions.verifyOtp),
       switchMap(({ code }) =>
         this.authService.verifyOtp(code).pipe(
-          map((user) => {
-            SHOW_TOAST({
-              title: '',
+          map((user) => {            
+           this.store.dispatch(
+             SHOW_TOAST({
+              title: 'OTP Verified',
               message: 'Your account is verified successfully',
               severity: ToastSeverity.SUCCESS,
-            });
+            }))
 
             return AuthActions.verifyOtpSuccess({ user });
           }),
           catchError((err) => {
             SHOW_TOAST({
-              title: '',
+              title: 'Failed To Verify OTP',
               message: err,
               severity: ToastSeverity.ERROR,
             });
@@ -92,20 +97,23 @@ export class AuthEffects {
       ofType(AuthActions.resendOtp),
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
-          map(() => {
-            SHOW_TOAST({
-              title: '',
+          map(() => {            
+           this.store.dispatch(
+             SHOW_TOAST({
+              title: 'Resent OTP',
               message: `We have successfully resent the OTP to ${phoneNumber}`,
               severity:ToastSeverity.SUCCESS,
-            });
+            }))
             return AuthActions.resendOtpSuccess();
           }),
           catchError((err) => {
-            SHOW_TOAST({
-              title:'',
+           this.store.dispatch(
+             SHOW_TOAST({
+              title:'Failed To Resend',
               message: `failled to resent OTP to ${phoneNumber}. Please try again`,
               severity: ToastSeverity.ERROR,
-            });
+            })
+           )
             return of(AuthActions.resendOtpFailure({ error: this.friendlyAuthError(err) }));
           }),
         ),
@@ -124,25 +132,34 @@ export class AuthEffects {
     ),
   );
 
-  updateProfileSuccess$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.updateProfileSuccess),
-      map(() =>
-        SHOW_TOAST({
-          title: '',
-          message: 'Profile updated successfully',
-          severity: ToastSeverity.SUCCESS,
-        }),
-      ),
-    ),
-  );
+  // updateProfileSuccess$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(AuthActions.updateProfileSuccess),
+  //     map(() =>
+  //      this.store.dispatch(
+  //        SHOW_TOAST({
+  //         title: '',
+  //         message: 'Profile updated successfully',
+  //         severity: ToastSeverity.SUCCESS,
+  //       }))
+  //     ),
+  //   ),
+  // );
   // Sign out
   signOut$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.signOut),
       switchMap(() =>
         this.authService.signOut().pipe(
-          map(() => AuthActions.signOutSuccess()),
+          map(() => {
+           this.store.dispatch(
+             SHOW_TOAST({
+              title: 'Signed Out',
+              message: `We have successfully Signed Out`,
+              severity:ToastSeverity.SUCCESS,
+            }))
+            return AuthActions.signOutSuccess();
+          }),
           catchError(() => of(AuthActions.signOutFailure())),
         ),
       ),

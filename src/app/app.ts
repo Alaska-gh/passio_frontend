@@ -2,12 +2,13 @@ import { Store } from '@ngrx/store';
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthActions } from '@core/store/auth/auth.actions';
+import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from '@core/header/header.component/header.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastModule],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

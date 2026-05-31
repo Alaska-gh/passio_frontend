@@ -1,5 +1,5 @@
 import { ApplicationConfig, isDevMode } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -35,9 +35,11 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { environment } from '@env/environment';
+import { MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    MessageService,
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
@@ -52,6 +54,9 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(), // lets you bind route params as @Input()
       withViewTransitions(), // smooth page transitions
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+      })
     ),
 
     // HTTP
