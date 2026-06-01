@@ -1,53 +1,41 @@
 import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Trip } from '@core/interfaces/trip.interface';
-import { TripsActions } from './trips.actions';
-import { RecordReturnResult } from '@core/services/trip.service';
-
-export interface TripsState extends EntityState<Trip> {
-  recording: boolean;
-  returnResult: RecordReturnResult | null;
+import { Ticket } from '@core/interfaces';
+import {  LOAD_TRIP, LOAD_TRIPS_FAILURE, LOAD_TRIPS_SUCCESS } from './trips.actions';
+import { adapter } from '../schedules/schedules.reducers';
+export interface TripState {
+  currentTrip: Trip | null;
+  issuedTicket: Ticket | null;
   loading: boolean;
+  tripLoading: boolean;
   error: string | null;
 }
 
-export const adapter: EntityAdapter<Trip> = createEntityAdapter<Trip>();
-
-const initialState: TripsState = adapter.getInitialState({
-  recording: false,
-  returnResult: null,
+export const initialTicketState: TripState = {
+  currentTrip: null,
+  issuedTicket: null,
   loading: false,
+  tripLoading: false,
   error: null,
-});
+};
 
 export const tripsReducer = createReducer(
-  initialState,
+  initialTicketState,
 
-  on(TripsActions.loadDriverTrips, (state) => ({ ...state, loading: true, error: null })),
-  on(TripsActions.loadDriverTripsSuccess, (state, { trips }) =>
-    adapter.setAll(trips, { ...state, loading: false }),
-  ),
-  on(TripsActions.loadDriverTripsFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error,
+    on(LOAD_TRIP, (state) => ({
+    ...state, tripLoading: true, error: null, currentTrip: null
   })),
 
-  on(TripsActions.recordReturn, (state) => ({
-    ...state,
-    recording: true,
-    error: null,
-    returnResult: null,
-  })),
-  on(TripsActions.recordReturnSuccess, (state, { result }) => ({
-    ...state,
-    recording: false,
-    returnResult: result,
-  })),
-  on(TripsActions.recordReturnFailure, (state, { error }) => ({
-    ...state,
-    recording: false,
-    error,
+  on(LOAD_TRIPS_SUCCESS, (state, { trip }) => {
+    console.log(trip);
+    
+  return {
+    ...state, tripLoading: false, currentTrip: trip
+  }}),
+
+  on(LOAD_TRIPS_FAILURE, (state, { error }) => ({
+    ...state, tripLoading: false, error
   })),
 );
 

@@ -1,79 +1,25 @@
 import { Injectable, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { switchMap, map, catchError, tap } from 'rxjs/operators';
-import { TicketsActions } from './tickets.action';
-import { TicketService } from '@core/services/ticket.service';
-import { SHOW_TOAST } from '../toast/toast.actions';
-import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
+import { from, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { TicketService } from '../../services/ticket.service';
+import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS } from './tickets.action';
 
 @Injectable()
-export class TicketsEffects {
+export class TicketEffects {
   private actions$ = inject(Actions);
   private ticketService = inject(TicketService);
-  private router = inject(Router);
 
-  loadMyTickets$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.loadMyTickets),
-      switchMap(() =>
-        this.ticketService.getMyTickets().pipe(
-          map((tickets) => TicketsActions.loadMyTicketsSuccess({ tickets })),
-          catchError((err) => of(TicketsActions.loadMyTicketsFailure({ error: err.message }))),
-        ),
-      ),
-    ),
-  );
 
-  purchaseTicket$ = createEffect(() =>
+  issueTicket$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicket),
-      switchMap(({ payload }) =>
-        this.ticketService.purchaseTicket(payload).pipe(
-          map((result) => TicketsActions.purchaseTicketSuccess({ result })),
-          catchError((err) => {
-            return of(TicketsActions.purchaseTicketFailure({ error: err.message }));
-          }),
-        ),
-      ),
-    ),
-  );
-
-  purchaseTicketSuccess$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicketSuccess),
-      tap(({ result }) => this.router.navigate(['/customer/ticket', result.ticketId])),
-      map(() => SHOW_TOAST({
-         title:'',
-         message: 'Ticket purchased!', 
-         severity: ToastSeverity.SUCCESS 
-        })),
-    ),
-  );
-
-  purchaseTicketFailure$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicketFailure),
-      map(({ error }) => SHOW_TOAST({
-         title: '',
-         message: error, 
-         severity: ToastSeverity.ERROR
-         })),
-    ),
-  );
-
-  verifyTicket$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.verifyTicket),
-      switchMap(({ qrPayload }) =>
-        this.ticketService.verifyTicket(qrPayload).pipe(
-          map((result) => TicketsActions.verifyTicketSuccess({ result })),
-          catchError((err) => {
-            return of(TicketsActions.verifyTicketFailure({ error: err.message }));
-          }),
-        ),
-      ),
-    ),
+      ofType(ISSUE_TICKET),
+      switchMap(({ ticket, tripId }) =>
+        from(this.ticketService.issueTicket(ticket, tripId)).pipe(
+          map((id) => ISSUE_TICKET_SUCCESS({ ticket: { ...ticket, tripId } })),
+          catchError((error) => of(ISSUE_TICKET_FAILURE({ error: error.message })))
+        )
+      )
+    )
   );
 }

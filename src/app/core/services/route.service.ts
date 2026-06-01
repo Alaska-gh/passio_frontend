@@ -37,7 +37,9 @@ export class RouteService {
         fareGHS: 120,
         active: true,
         destinationLat: 6.6885,
-        destinationLng: -1.6244
+        destinationLng: -1.6244,
+        times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+
       },
       {
         id: '2',
@@ -47,6 +49,8 @@ export class RouteService {
         distanceKm: 220,
         estimatedDurationMin: 210,
         fareGHS: 100,
+            times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+
         active: true
       }
     ]).pipe(delay(500));

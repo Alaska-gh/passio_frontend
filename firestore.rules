@@ -44,10 +44,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /trips/{tripId} {
-      allow read:                   if isAdmin() || (isDriver() && resource.data.driverId == uid());
-      allow create, update, delete: if false;
-    }
+  match /trips/{tripId} {
+    allow read: if isSignedIn();
+
+    allow create: if isSignedIn();
+    allow update: if isAdmin();
+    allow delete: if false;
+  }
 
     match /queue/{docId} {
       allow read, write: if false;

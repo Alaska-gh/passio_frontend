@@ -14,4 +14,5 @@ export interface BusRoute {
   destinationLat?: number;
   destinationLng?: number;
   active: boolean;
+  times: string[];
 }

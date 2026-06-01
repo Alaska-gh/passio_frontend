@@ -28,9 +28,7 @@ import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { metaReducers, reducers } from '@core/store';
 import { AuthEffects } from '@core/store/auth/auth.effects';
 import { SchedulesEffects } from '@core/store/schedules/schedules.effects';
-import { TicketsEffects } from '@core/store/tickets/tickets.effects';
 import { BusesEffects } from '@core/store/buses/buses.effects';
-import { TripsEffects } from '@core/store/trips/trips.effects';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -39,6 +37,8 @@ import { MessageService } from 'primeng/api';
 import { ToastEffects } from '@core/store/toast/toast.effects';
 import { ActiveRouteEffects } from '@core/store/routes/route.effects';
 import { getApp } from 'firebase/app';
+import { TripsEffects } from '@core/store/trips/trips.effects';
+import { TicketEffects } from '@core/store/tickets/tickets.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -71,7 +71,7 @@ export const appConfig: ApplicationConfig = {
     //  NgRx Store
     provideStore(reducers, { metaReducers }), 
 
-    provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects, ToastEffects, ActiveRouteEffects]),
+    provideEffects([AuthEffects, SchedulesEffects, TripsEffects, TicketEffects, BusesEffects, ToastEffects, ActiveRouteEffects]),
 
     // Redux DevTools — only in dev mode
     provideStoreDevtools({

@@ -1,85 +1,58 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   collection,
-  collectionData,
+  addDoc,
   doc,
-  docData,
   query,
   where,
-  orderBy,
+  getDocs,
+  serverTimestamp,
+  increment,
+  runTransaction,
 } from '@angular/fire/firestore';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-import { Auth } from '@angular/fire/auth';
-import { Observable, from, switchMap, of } from 'rxjs';
-import { Ticket } from '@core/interfaces/ticket.interface';
-import { PaymentProvider } from '@core/interfaces/payment.interface';
-
-export interface PurchasePayload {
-  scheduleId: string;
-  passengerCount: number;
-  paymentProvider: PaymentProvider;
-  mobileNumber?: string;
-}
-
-export interface PurchaseResult {
-  ticketId: string;
-  paymentReference: string;
-  qrPayload: string;
-  status: 'success' | 'pending';
-}
-
-export interface VerifyResult {
-  valid: boolean;
-  reason?: 'already_used' | 'expired' | 'wrong_route' | 'invalid_signature' | 'not_found';
-  ticket?: Pick<Ticket, 'id' | 'routeId' | 'scheduleId' | 'passengerCount'>;
-}
+import { Ticket, Trip } from '@core/interfaces';
+import { Observable, from, switchMap, map, defer } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private functions = inject(Functions);
   private firestore = inject(Firestore);
-  private auth = inject(Auth);
+  private injector = inject(Injector);
 
-  /**
-   * Calls the purchaseTicket Cloud Function.
-   * Returns an Observable that emits the result once.
-   */
-  purchaseTicket(payload: PurchasePayload): Observable<PurchaseResult> {
-    const fn = httpsCallable<PurchasePayload, PurchaseResult>(this.functions, 'purchaseTicket');
-    return from(fn(payload)).pipe(switchMap((result) => of(result.data)));
+  generateTicketNumber(): string {
+    const prefix = 'PTA';
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}-${timestamp}-${random}`;
   }
 
-  /**
-   * Calls the verifyTicket Cloud Function.
-   * Used by conductors to validate a QR code.
-   */
-  verifyTicket(qrPayload: string): Observable<VerifyResult> {
-    const fn = httpsCallable<{ qrPayload: string }, VerifyResult>(this.functions, 'verifyTicket');
-    return from(fn({ qrPayload })).pipe(switchMap((result) => of(result.data)));
-  }
+  issueTicket(ticket: Ticket, tripId: string): Observable<string> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const tripRef = doc(this.firestore, 'trips', tripId);
+        const ticketsRef = collection(this.firestore, 'tickets');
 
-  /**
-   * Real-time stream of the current customer's tickets,
-   * ordered by purchase date descending.
-   */
-  getMyTickets(): Observable<Ticket[]> {
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) return of([]);
-    return collectionData(
-      query(
-        collection(this.firestore, 'tickets'),
-        where('customerId', '==', uid),
-        orderBy('purchasedAt', 'desc'),
-      ),
-      { idField: 'id' },
-    ) as Observable<Ticket[]>;
-  }
+        return from(
+          runTransaction(this.firestore, async (transaction) => {
+            const tripSnap = await transaction.get(tripRef);
+            if (!tripSnap.exists()) throw new Error('Trip not found');
 
-  /** Real-time stream of a single ticket by ID */
-  getTicketById(id: string): Observable<Ticket | undefined> {
-    return docData(doc(this.firestore, 'tickets', id), { idField: 'id' }) as Observable<
-      Ticket | undefined
-    >;
+            const trip = tripSnap.data() as Trip;
+            if (trip.availableSeats < ticket.numberOfSeats) {
+              throw new Error(`Only ${trip.availableSeats} seats available`);
+            }
+
+            const newTicketRef = doc(ticketsRef);
+            transaction.set(newTicketRef, { ...ticket, issuedAt: serverTimestamp() });
+            transaction.update(tripRef, {
+              bookedSeats: increment(ticket.numberOfSeats),
+              availableSeats: increment(-ticket.numberOfSeats),
+            });
+
+            return newTicketRef.id;
+          })
+        );
+      })
+    );
   }
 }

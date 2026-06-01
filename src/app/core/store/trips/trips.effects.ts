@@ -1,64 +1,35 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { switchMap, map, catchError } from 'rxjs/operators';
-import { TripsActions } from './trips.actions';
+import { from, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import {
+   LOAD_TRIP,
+   LOAD_TRIPS_FAILURE,
+   LOAD_TRIPS_SUCCESS } from './trips.actions';
 import { TripService } from '@core/services/trip.service';
-import { SHOW_TOAST } from '../toast/toast.actions';
-import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Injectable()
 export class TripsEffects {
   private actions$ = inject(Actions);
   private tripService = inject(TripService);
 
-  loadDriverTrips$ = createEffect(() =>
+  loadTrip$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(TripsActions.loadDriverTrips),
-      switchMap(({ driverId }) =>
-        this.tripService.getDriverTrips(driverId).pipe(
-          map((trips) => TripsActions.loadDriverTripsSuccess({ trips })),
-          catchError((err) => of(TripsActions.loadDriverTripsFailure({ error: err.message }))),
-        ),
-      ),
-    ),
-  );
-
-  recordReturn$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TripsActions.recordReturn),
-      switchMap(({ payload }) =>
-        this.tripService.recordReturn(payload).pipe(
-          map((result) => TripsActions.recordReturnSuccess({ result })),
-          catchError((error) => {
-            return of(TripsActions.recordReturnFailure({ error: error.message }));
+      ofType(LOAD_TRIP),
+      switchMap(({ route, origion, destination, date, time, pricePerSeat}) =>
+        from(this.tripService.getOrCreateTrip(route, origion, destination, date, time, pricePerSeat)).pipe(
+          map((trip) => {
+            console.log(trip);
+            
+            return LOAD_TRIPS_SUCCESS({ trip })
           }),
-        ),
-      ),
-    ),
+          catchError((error) => {
+            console.log(error);
+            
+            return of(LOAD_TRIPS_FAILURE({ error: error.message }))})
+        )
+      )
+    )
   );
 
-  recordReturnSuccess$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TripsActions.recordReturnSuccess),
-      map(({ result }) =>
-        SHOW_TOAST({
-          title: '',
-          message: result.message,
-          severity: ToastSeverity.SUCCESS,
-        }),
-      ),
-    ),
-  );
-
-  recordReturnFailure$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TripsActions.recordReturnFailure),
-      map(({ error }) => SHOW_TOAST
-      ({ 
-        title:'',
-        message: error, 
-        severity: ToastSeverity.ERROR })),
-    ),
-  );
 }

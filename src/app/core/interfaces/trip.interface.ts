@@ -1,19 +1,15 @@
-export type TripStatus = 'in_progress' | 'returned';
-
-export interface GeoPoint {
-  lat: number;
-  lng: number;
-}
+import { Bus } from "./bus.interface";
 
 export interface Trip {
-  id: string;
-  scheduleId: string;
-  busId: string;
-  driverId: string;
-  status: TripStatus;
-  departedAt: Date;
-  returnedAt?: Date;
-  returnGPS?: GeoPoint;
-  flagged: boolean;
-  flagReason?: string;
+  id?: string;
+  route: string;
+  origin: string;
+  destination: string;
+  date: string;
+  time: string;
+  totalSeats: number;
+  bookedSeats: number;
+  availableSeats: number;
+  pricePerSeat: number;
+  // buss: Bus
 }

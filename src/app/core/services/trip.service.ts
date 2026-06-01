@@ -1,17 +1,15 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   collection,
-  collectionData,
-  doc,
-  docData,
   query,
   where,
-  orderBy,
+  getDocs,
+  addDoc,
 } from '@angular/fire/firestore';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-import { Observable, from, switchMap, of } from 'rxjs';
+import { Observable, from, switchMap, of, defer, map, tap } from 'rxjs';
 import { Trip } from '@core/interfaces/trip.interface';
+import { Bus } from '@core/interfaces';
 
 export interface RecordReturnPayload {
   scheduleId: string;
@@ -27,56 +25,60 @@ export interface RecordReturnResult {
 
 @Injectable({ providedIn: 'root' })
 export class TripService {
-  private functions = inject(Functions);
   private firestore = inject(Firestore);
+  private injector = inject(Injector);
 
-  /**
-   * Calls the recordDriverReturn Cloud Function.
-   * The server sets the timestamp and checks GPS —
-   * the client only supplies the schedule ID and coordinates.
-   */
-  recordReturn(payload: RecordReturnPayload): Observable<RecordReturnResult> {
-    const fn = httpsCallable<RecordReturnPayload, RecordReturnResult>(
-      this.functions,
-      'recordDriverReturn',
+  getOrCreateTrip(
+    route: string,
+    origin: string,
+    destination: string,
+    date: string,
+    time: string,
+    pricePerSeat: number,
+  ): Observable<Trip> {
+    console.log('getOrCreateTrip called');
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        console.log('inside injection context');
+        const tripsRef = collection(this.firestore, 'trips');
+        const q = query(
+          tripsRef,
+          where('route', '==', route),
+          where('date', '==', date),
+          where('time', '==', time)
+        );
+
+        return from(getDocs(q)).pipe(
+          tap((trip) => console.log('Loaded trip', trip)
+          ),
+          switchMap((snapshot) => {
+            if (!snapshot.empty) {
+              const docSnap = snapshot.docs[0];
+              const trip: Trip = { id: docSnap.id, ...docSnap.data() } as Trip;
+              return of(trip); // wrap in array so it emits as observable
+            }
+
+            const newTrip: Omit<Trip, 'id'> = {
+              route,
+              origin,
+              destination,
+              date,
+              time,
+              totalSeats: 14,
+              bookedSeats: 0,
+              availableSeats: 14,
+              pricePerSeat,
+              // buss
+            };
+
+            return from(addDoc(tripsRef, newTrip)).pipe(
+              tap((trip) => console.log('New trip created', trip)
+              ),
+              map((docRef) => ({ id: docRef.id, ...newTrip } as Trip))
+            );
+          })
+        );
+      })
     );
-    return from(fn(payload)).pipe(switchMap((result) => of(result.data)));
-  }
-
-  /**
-   * Real-time stream of all trips for a given driver,
-   * most recent first.
-   */
-  getDriverTrips(driverId: string): Observable<Trip[]> {
-    return collectionData(
-      query(
-        collection(this.firestore, 'trips'),
-        where('driverId', '==', driverId),
-        orderBy('departedAt', 'desc'),
-      ),
-      { idField: 'id' },
-    ) as Observable<Trip[]>;
-  }
-
-  /** Real-time stream of a single trip */
-  getTripById(tripId: string): Observable<Trip | undefined> {
-    return docData(doc(this.firestore, 'trips', tripId), { idField: 'id' }) as Observable<
-      Trip | undefined
-    >;
-  }
-
-  /**
-   * Real-time stream of the currently active trip for a driver.
-   * Emits null if no active trip exists.
-   */
-  getActiveTrip(driverId: string): Observable<Trip[]> {
-    return collectionData(
-      query(
-        collection(this.firestore, 'trips'),
-        where('driverId', '==', driverId),
-        where('status', '==', 'in_progress'),
-      ),
-      { idField: 'id' },
-    ) as Observable<Trip[]>;
   }
 }

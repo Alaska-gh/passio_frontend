@@ -23,6 +23,19 @@ export const routes: Routes = [
       import('./features/customer/customer.routes').then((m) => m.CUSTOMER_ROUTES),
   },
 
+  {
+    path: 'cashier',
+    // canActivate: ['cashier', 'admin'],
+    children: [
+        {
+        path: 'issue-ticket',
+        loadComponent: () =>
+          import('./features/cashier/issue-ticket/issue-ticket.component/issue-ticket.component')
+            .then(m => m.IssueTicketComponent),
+      },
+    ]
+  },
+
   //  Admin dashboard
   // {
   //   path: 'admin',
