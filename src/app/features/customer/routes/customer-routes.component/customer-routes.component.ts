@@ -7,12 +7,14 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TagModule } from 'primeng/tag';
 import { CommonModule } from '@angular/common';
-import { RouteService } from '@core/services/route.service';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { Router } from '@angular/router';
 import { BusRoute } from '@core/interfaces';
-import { Observable } from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { selectActiveRoutes } from '@core/store/routes/route.selectors';
+import { GET_ACTIVE_ROUTES } from '@core/store/routes/route.actions';
 
 @Component({
   selector: 'app-customer-routes.component',
@@ -33,36 +35,61 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './customer-routes.component.css',
 })
 export class CustomerRoutesComponent implements OnInit {
-  sources = ['Koforidua'];
-  destinations = ['Accra', 'Kasoa', 'Circle', 'Tema'];
   filteredSources: string[] = [];
   filteredDestinations: string[] = [];
+  filteredRoutes: BusRoute[] = [];
   from: string | undefined;
   to: string | undefined;
-
-  private routeService = inject(RouteService);
-  private router = inject(Router);
-
-  routes$!: Observable<BusRoute[]>;
+  destroy$ = new Subject<void>
+  routes!: BusRoute[];
   today = new Date().toISOString().slice(0, 10);
 
-  ngOnInit(): void {
-    this.routes$ = this.routeService.getActiveRoutes();
+  private router = inject(Router);
+  private store = inject(Store)
+
+  ngOnInit(): void {    
+    this.store.dispatch(GET_ACTIVE_ROUTES())
+    this.store.select(selectActiveRoutes).pipe(
+      takeUntil(this.destroy$),
+      tap((routes) => {
+        this.routes = routes
+        this.filteredRoutes = routes
+      })
+    ).subscribe();
+
   }
 
   getFilterSources(event: any) {
     const query = event.query.toLowerCase();
-
-    this.filteredSources = this.sources.filter((item) => item.toLowerCase().includes(query));
+     this.filteredSources = this.routes.flatMap(route => route.origin).filter(
+      (route) => route.toLowerCase().includes(query)) 
   }
 
   getFilterDestinations(event: any) {
     const query = event.query.toLowerCase();
 
-    this.filteredDestinations = this.destinations.filter((item) =>
-      item.toLowerCase().includes(query),
-    );
+   this.filteredDestinations = this.routes.flatMap(route => route.destination).filter(
+    route => route.toLowerCase().includes(query))
   }
+
+  findRoute(): void {
+  const from = this.from?.trim().toLowerCase();
+  const to = this.to?.trim().toLowerCase();
+
+  if (!from && !to) {
+    this.filteredRoutes = [...this.routes];
+    return;
+  }
+
+  this.filteredRoutes = this.routes.filter(route => {
+    const matchesOrigin = !from ||
+      route.origin.toLowerCase().includes(from);
+
+    const matchesDestination = !to ||
+      route.destination.toLowerCase().includes(to)
+    return matchesOrigin && matchesDestination;
+  });
+}
 
   selectRoute(routeId: string): void {
     this.router.navigate(['/customer/schedules', routeId]);

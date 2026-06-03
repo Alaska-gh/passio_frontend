@@ -11,12 +11,10 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 // Firebase
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
   getFirestore,
   provideFirestore,
-  connectFirestoreEmulator,
-  initializeFirestore,
 } from '@angular/fire/firestore';
 import { getFunctions, provideFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
 import { getStorage, provideStorage, connectStorageEmulator } from '@angular/fire/storage';
@@ -27,16 +25,17 @@ import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { metaReducers, reducers } from '@core/store';
 import { AuthEffects } from '@core/store/auth/auth.effects';
-import { SchedulesEffects } from '@core/store/schedules/schedules.effects';
-import { TicketsEffects } from '@core/store/tickets/tickets.effects';
 import { BusesEffects } from '@core/store/buses/buses.effects';
-import { TripsEffects } from '@core/store/trips/trips.effects';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { environment } from '@env/environment';
 import { MessageService } from 'primeng/api';
 import { ToastEffects } from '@core/store/toast/toast.effects';
+import { ActiveRouteEffects } from '@core/store/routes/route.effects';
+import { getApp } from 'firebase/app';
+import { TripsEffects } from '@core/store/trips/trips.effects';
+import { TicketEffects } from '@core/store/tickets/tickets.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,28 +49,22 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
-    // Router
     provideRouter(
       routes,
-      withComponentInputBinding(), // lets you bind route params as @Input()
+      withComponentInputBinding(),
       withViewTransitions(), // smooth page transitions
       withInMemoryScrolling({
         scrollPositionRestoration: 'top',
       })
     ),
-
-    // HTTP
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
 
-    //  Animations
     provideAnimations(),
 
-    //  NgRx Store
-    provideStore(reducers, { metaReducers }),
+    provideStore(reducers, { metaReducers }), 
 
-    provideEffects([AuthEffects, SchedulesEffects, TicketsEffects, BusesEffects, TripsEffects, ToastEffects]),
+    provideEffects([AuthEffects, TripsEffects, TicketEffects, BusesEffects, ToastEffects, ActiveRouteEffects, BusesEffects]),
 
-    // Redux DevTools — only in dev mode
     provideStoreDevtools({
       maxAge: 25,
       logOnly: !isDevMode(),
@@ -79,29 +72,15 @@ export const appConfig: ApplicationConfig = {
       trace: false,
     }),
 
-    // Firebase
     provideFirebaseApp(() => initializeApp(environment.firebase)),
 
     provideAuth(() => {
       const auth = getAuth();
-      if (environment.useEmulators) {
-        connectAuthEmulator(auth, 'http://localhost:9099', {
-          disableWarnings: true,
-        });
-      }
       return auth;
     }),
 
-    provideFirestore(() => {
-      // Initialize with proper settings
-      const db = initializeFirestore(initializeApp(environment.firebase), {
-        experimentalForceLongPolling: true, // Helps with emulators
-      });
-      if (environment.useEmulators) {
-        connectFirestoreEmulator(db, 'localhost', 8080);
-      }
-      return db;
-    }),
+    provideFirestore(() => getFirestore(getApp())),
+    
 
     provideFunctions(() => {
       const fns = getFunctions();
@@ -121,7 +100,6 @@ export const appConfig: ApplicationConfig = {
 
     provideMessaging(() => getMessaging()),
 
-    // PWA Service Worker
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

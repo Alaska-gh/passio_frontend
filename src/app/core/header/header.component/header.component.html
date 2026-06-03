@@ -32,7 +32,7 @@
     <p-avatar icon="fas fa-user" style="background-color: #dee9fc; color: #1a2551" shape="circle" 
     (click)="menu.toggle($event)" class="justify-end"/>
 
-    <p-menu #menu [model]="items" [popup]="true" >
+    <p-menu #menu [model]="items" [popup]="true">
        <ng-template #submenuheader let-item>
           <span class="text-primary font-bold">{{ item.label }}</span>
         </ng-template>

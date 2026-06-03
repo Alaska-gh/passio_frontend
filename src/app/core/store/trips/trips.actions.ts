@@ -1,16 +1,20 @@
-import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { Trip } from '@core/interfaces/trip.interface';
-import { RecordReturnPayload, RecordReturnResult } from '@core/services/trip.service';
+import { Trip } from "@core/interfaces";
+import { createAction, props } from "@ngrx/store";
 
-export const TripsActions = createActionGroup({
-  source: 'Trips',
-  events: {
-    'Load Driver Trips': props<{ driverId: string }>(),
-    'Load Driver Trips Success': props<{ trips: Trip[] }>(),
-    'Load Driver Trips Failure': props<{ error: string }>(),
+export const LOAD_CURRENT_TRIP = createAction(
+  '[Trips] Load Trip',
+   props<{ route: string; origin: string; destination: string; date: string; pricePerSeat: number }>()
+)
 
-    'Record Return': props<{ payload: RecordReturnPayload }>(),
-    'Record Return Success': props<{ result: RecordReturnResult }>(),
-    'Record Return Failure': props<{ error: string }>(),
-  },
-});
+export const LOAD_CURRENT_TRIP_SUCCESS = createAction(
+  '[Trips] Load Trips Success',
+  props<{ trip: Trip }>()
+)
+
+export const LOAD_CURRENT_TRIP_FAILURE = createAction(
+  '[Trips] Load Trips Failure',
+   props<{ error: string }>()
+)
+
+export const RESET_TRIP = createAction('[Trips] Reset Trip');
+

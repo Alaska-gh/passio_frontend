@@ -9,7 +9,6 @@ export const CUSTOMER_ROUTES: Routes = [
       ),
     title: 'Passio — Home',
   },
-
   {
     path: 'routes',
     loadComponent: () =>
@@ -18,7 +17,6 @@ export const CUSTOMER_ROUTES: Routes = [
       ),
     title: 'Passio — Browse Routes',
   },
-
   {
     path: 'tickets',
     loadComponent: () =>
@@ -27,7 +25,6 @@ export const CUSTOMER_ROUTES: Routes = [
       ),
     title: 'Passio — My Tickets',
   },
-
   {
     path: 'account',
     loadComponent: () =>
@@ -35,15 +32,6 @@ export const CUSTOMER_ROUTES: Routes = [
         (m) => m.CustomerAccountComponent
       ),
   },
-
-  {
-    path: 'schedules/:routeId',
-    loadComponent: () =>
-      import('./schedules/schedules-list.component/schedules-list.component').then(
-        (m) => m.SchedulesListComponent
-      ),
-  },
-
   {
     path: 'checkout/:scheduleId',
     loadComponent: () =>
@@ -51,7 +39,6 @@ export const CUSTOMER_ROUTES: Routes = [
         (m) => m.CheckoutComponent
       ),
   },
-
   {
     path: 'ticket/:ticketId',
     loadComponent: () =>
@@ -59,7 +46,6 @@ export const CUSTOMER_ROUTES: Routes = [
         (m) => m.TicketDetailComponent
       ),
   },
-
   {
     path: '',
     redirectTo: 'home',

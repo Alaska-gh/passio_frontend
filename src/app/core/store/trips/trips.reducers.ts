@@ -1,54 +1,40 @@
 import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Trip } from '@core/interfaces/trip.interface';
-import { TripsActions } from './trips.actions';
-import { RecordReturnResult } from '@core/services/trip.service';
-
-export interface TripsState extends EntityState<Trip> {
-  recording: boolean;
-  returnResult: RecordReturnResult | null;
+import { Ticket } from '@core/interfaces';
+import { LOAD_CURRENT_TRIP, LOAD_CURRENT_TRIP_FAILURE, LOAD_CURRENT_TRIP_SUCCESS, RESET_TRIP } from './trips.actions';
+export interface TripState {
+  currentTrip: Trip | null;
+  issuedTicket: Ticket | null;
   loading: boolean;
+  tripLoading: boolean;
   error: string | null;
 }
 
-export const adapter: EntityAdapter<Trip> = createEntityAdapter<Trip>();
-
-const initialState: TripsState = adapter.getInitialState({
-  recording: false,
-  returnResult: null,
+export const initialTicketState: TripState = {
+  currentTrip: null,
+  issuedTicket: null,
   loading: false,
+  tripLoading: false,
   error: null,
-});
+};
 
 export const tripsReducer = createReducer(
-  initialState,
+  initialTicketState,
 
-  on(TripsActions.loadDriverTrips, (state) => ({ ...state, loading: true, error: null })),
-  on(TripsActions.loadDriverTripsSuccess, (state, { trips }) =>
-    adapter.setAll(trips, { ...state, loading: false }),
-  ),
-  on(TripsActions.loadDriverTripsFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error,
+  on(LOAD_CURRENT_TRIP, (state) => ({
+    ...state, tripLoading: true, error: null, currentTrip: null
   })),
 
-  on(TripsActions.recordReturn, (state) => ({
-    ...state,
-    recording: true,
-    error: null,
-    returnResult: null,
+  on(LOAD_CURRENT_TRIP_SUCCESS, (state, { trip }) => ({
+    ...state, tripLoading: false, currentTrip: trip
   })),
-  on(TripsActions.recordReturnSuccess, (state, { result }) => ({
-    ...state,
-    recording: false,
-    returnResult: result,
+
+  on(LOAD_CURRENT_TRIP_FAILURE, (state, { error }) => ({
+    ...state, tripLoading: false, error
   })),
-  on(TripsActions.recordReturnFailure, (state, { error }) => ({
-    ...state,
-    recording: false,
-    error,
-  })),
+
+  on(RESET_TRIP, (state) => ({
+  ...state, currentTrip: null, tripLoading: false, tripError: null,
+}))
 );
-
-export const { selectAll } = adapter.getSelectors();

@@ -1,4 +1,4 @@
-export type BusStatus = 'active' | 'inactive' | 'maintenance';
+export type BusStatus = 'active' | 'inactive' | 'maintenance' | 'on-trip';
 
 export interface Bus {
   id: string;
@@ -8,4 +8,6 @@ export interface Bus {
   model?: string;
   assignedDriverId?: string;
   createdAt: Date;
+  busType: string;
+  queueOrder: number | null;
 }

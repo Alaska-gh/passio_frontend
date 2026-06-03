@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthActions } from '@core/store/auth/auth.actions';
+import * as AuthActions from '@core/store/auth/auth.actions';
 import { selectAuthError, selectAuthLoading, selectOtpSent } from '@core/store/auth/auth.selectors';
 import { Store } from '@ngrx/store';
 import { ButtonModule } from 'primeng/button';
@@ -34,18 +34,14 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loading$ = this.store.select(selectAuthLoading);
-    this.store
-      .select(selectAuthError)
-      .pipe(
+    this.store.select(selectAuthError).pipe(
         takeUntil(this.destroy$),
         tap((err) => (this.error = err)),
-      )
-      .subscribe();
+      ).subscribe();
 
-    this.store
-      .select(selectOtpSent)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((sent) => {
+    this.store.select(selectOtpSent).pipe(
+      takeUntil(this.destroy$)).subscribe(
+        (sent) => {
         if (sent) {
           this.router.navigate(['/auth/verify']);
         }
@@ -70,8 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     const normalized = raw.startsWith('0') ? raw.slice(1) : raw;
     const phoneNumber = `+233${normalized}`;
 
-    // Dispatch to the store — the Effect handles everything else
-    this.store.dispatch(AuthActions.sendOtp({ phoneNumber }));
+    this.store.dispatch(AuthActions.SEND_OTP({ phoneNumber }));
   }
 
   ngOnDestroy(): void {

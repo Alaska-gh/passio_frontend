@@ -15,10 +15,10 @@ import {
   docData,
   setDoc,
   serverTimestamp,
-  getDoc,
   updateDoc,
+  getDoc,
 } from '@angular/fire/firestore';
-import { Observable, from, switchMap, of, tap, throwError, map, defer } from 'rxjs';
+import { Observable, from, switchMap, of, tap, throwError, map, defer, catchError, take } from 'rxjs';
 import { User, UserRole } from '@core/interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -69,8 +69,7 @@ export class AuthService {
       runInInjectionContext(this.injector, () =>
         from(this.confirmationResult!.confirm(code)).pipe(
           switchMap((credential) => {
-            const isNewUser =
-              credential.user.metadata.creationTime === credential.user.metadata.lastSignInTime;
+            const isNewUser = credential.user.metadata.creationTime === credential.user.metadata.lastSignInTime;
             return this.ensureUserProfile$(credential.user).pipe(
               switchMap(() => this.userDoc$(credential.user.uid)),
               map((user) => ({ ...user, isNewUser })),
@@ -78,14 +77,12 @@ export class AuthService {
           }),
           tap((user) => {
             sessionStorage.removeItem('rgh_pending_phone');
-            this.redirectByRole(user.role, user.isNewUser);
-          }),
-        ),
+            localStorage.setItem('passio_logedin_user', JSON.stringify(user))
+            this.redirectByRole(user.role);
+          })),
       ),
     );
   }
-
-  // Add to AuthService
 
   updateProfile(uid: string, data: { name?: string; email?: string }): Observable<void> {
     return defer(() =>
@@ -103,6 +100,7 @@ export class AuthService {
   }
 
   signOut(): Observable<void> {
+    localStorage.removeItem('passio_logedin_user')
     return from(signOut(this.auth));
   }
 
@@ -117,7 +115,9 @@ export class AuthService {
     return defer(() =>
       runInInjectionContext(this.injector, () => {
         const ref = doc(this.firestore, 'users', uid);
-        return docData(ref, { idField: 'uid' }) as Observable<User>;
+        return (docData(ref, { idField: 'uid' }) as Observable<User>).pipe(
+          take(1)
+        );
       }),
     );
   }
@@ -129,29 +129,33 @@ export class AuthService {
 
         return from(getDoc(ref)).pipe(
           switchMap((snap) => {
-            if (snap.exists()) return of(void 0);
+            if (snap.exists()) {
+              return of(void 0)
+            };
 
-            return from(
-              setDoc(ref, {
+            const data = {
                 uid: firebaseUser.uid,
                 phone: firebaseUser.phoneNumber ?? '',
                 role: 'customer',
                 name: firebaseUser.displayName,
                 createdAt: serverTimestamp(),
-              }),
-            );
+              }
+
+            return from(
+              setDoc(ref, data))
           }),
         );
       }),
     );
   }
 
-  private redirectByRole(role: UserRole, isNewUser = false): void {
+  private redirectByRole(role: UserRole): void {
     const routes: Record<UserRole, string> = {
       customer: '/customer/home',
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
+      cashier: '/cashier',
     };
 
     this.router.navigate([routes[role]]);

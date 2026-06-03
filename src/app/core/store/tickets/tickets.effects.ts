@@ -1,79 +1,53 @@
 import { Injectable, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { switchMap, map, catchError, tap } from 'rxjs/operators';
-import { TicketsActions } from './tickets.action';
-import { TicketService } from '@core/services/ticket.service';
-import { SHOW_TOAST } from '../toast/toast.actions';
-import { ToastSeverity } from '@core/interfaces/primeng-severity.enums';
+import { catchError, map, switchMap, withLatestFrom, exhaustMap } from 'rxjs/operators';
+import { TicketService } from '../../services/ticket.service';
+import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS, LOAD_TODAY_SUMMARY, LOAD_TODAY_SUMMARY_FAILURE, LOAD_TODAY_SUMMARY_SUCCESS } from './tickets.action';
+import { selectCurrentUser } from '../auth/auth.selectors';
+import { Store } from '@ngrx/store';
+import { TripService } from '@core/services/trip.service';
 
 @Injectable()
-export class TicketsEffects {
+export class TicketEffects {
   private actions$ = inject(Actions);
   private ticketService = inject(TicketService);
-  private router = inject(Router);
+  private tripService = inject(TripService)
+  private store = inject(Store)
 
-  loadMyTickets$ = createEffect(() =>
+  issueTicket$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(TicketsActions.loadMyTickets),
-      switchMap(() =>
-        this.ticketService.getMyTickets().pipe(
-          map((tickets) => TicketsActions.loadMyTicketsSuccess({ tickets })),
-          catchError((err) => of(TicketsActions.loadMyTicketsFailure({ error: err.message }))),
-        ),
-      ),
-    ),
+      ofType(ISSUE_TICKET),
+      exhaustMap(({ ticket, tripId, busId, queueOrder, route, origin,
+        destination, date, pricePerSeat }) =>
+        this.tripService.issueSeatAndSaveTicket(
+          ticket, tripId, busId, ticket.numberOfSeats,
+          queueOrder, route, origin, destination, date, pricePerSeat
+        ).pipe(
+          map(({ ticketId, rotated }) =>
+            ISSUE_TICKET_SUCCESS({ ticket: { ...ticket, id: ticketId }, rotated })
+          ),
+          catchError((error) =>
+            of(ISSUE_TICKET_FAILURE({ error: error.message }))
+          )
+        )
+      )
+    )
   );
 
-  purchaseTicket$ = createEffect(() =>
+  loadTodaySummary$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicket),
-      switchMap(({ payload }) =>
-        this.ticketService.purchaseTicket(payload).pipe(
-          map((result) => TicketsActions.purchaseTicketSuccess({ result })),
-          catchError((err) => {
-            return of(TicketsActions.purchaseTicketFailure({ error: err.message }));
-          }),
-        ),
-      ),
-    ),
-  );
-
-  purchaseTicketSuccess$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicketSuccess),
-      tap(({ result }) => this.router.navigate(['/customer/ticket', result.ticketId])),
-      map(() => SHOW_TOAST({
-         title:'',
-         message: 'Ticket purchased!', 
-         severity: ToastSeverity.SUCCESS 
-        })),
-    ),
-  );
-
-  purchaseTicketFailure$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.purchaseTicketFailure),
-      map(({ error }) => SHOW_TOAST({
-         title: '',
-         message: error, 
-         severity: ToastSeverity.ERROR
-         })),
-    ),
-  );
-
-  verifyTicket$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TicketsActions.verifyTicket),
-      switchMap(({ qrPayload }) =>
-        this.ticketService.verifyTicket(qrPayload).pipe(
-          map((result) => TicketsActions.verifyTicketSuccess({ result })),
-          catchError((err) => {
-            return of(TicketsActions.verifyTicketFailure({ error: err.message }));
-          }),
-        ),
-      ),
-    ),
-  );
+      ofType(LOAD_TODAY_SUMMARY),
+      withLatestFrom(this.store.select(selectCurrentUser)),
+      switchMap(([, user]) => {
+        if (!user) return of(LOAD_TODAY_SUMMARY_FAILURE({ error: 'No user' }));
+        return this.ticketService.getTodaySummary(user.uid).pipe(
+          map((summary) => LOAD_TODAY_SUMMARY_SUCCESS({ summary })),
+          catchError((error) =>
+            of(LOAD_TODAY_SUMMARY_FAILURE({ error: error.message }))
+          )
+        );
+      })
+    )
+);
 }

@@ -1,12 +1,15 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
+import { redirectGuard } from '@core/guards/redirect.guard';
 import { roleGuard } from '@core/guards/role.guard';
+import { EmptyComponent } from './empty.component';
 
 export const routes: Routes = [
   // Default redirect
   {
     path: '',
-    redirectTo: 'customer',
+    canActivate: [redirectGuard],
+    component: EmptyComponent,
     pathMatch: 'full',
   },
 
@@ -21,6 +24,13 @@ export const routes: Routes = [
     path: 'customer',
     loadChildren: () =>
       import('./features/customer/customer.routes').then((m) => m.CUSTOMER_ROUTES),
+  },
+
+  {
+    path: 'cashier',
+    canActivate: [authGuard, roleGuard(['cashier'])],
+    loadChildren: () =>
+      import('./features/cashier/cashier.routes').then(m => m.CASHIER_ROUTES),  
   },
 
   //  Admin dashboard

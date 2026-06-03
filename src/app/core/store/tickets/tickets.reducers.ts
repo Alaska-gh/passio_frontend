@@ -1,85 +1,62 @@
-import { createReducer, on } from '@ngrx/store';
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { Ticket } from '@core/interfaces/ticket.interface';
-import { VerifyResult } from '@core/services/ticket.service';
-import { TicketsActions } from './tickets.action';
+import { DailySummary, Ticket } from "@core/interfaces";
+import { createReducer, on } from "@ngrx/store";
+import {
+  ISSUE_TICKET,
+  ISSUE_TICKET_FAILURE, 
+  ISSUE_TICKET_SUCCESS,
+  LOAD_TODAY_SUMMARY, 
+  LOAD_TODAY_SUMMARY_FAILURE, 
+  LOAD_TODAY_SUMMARY_SUCCESS, 
+  RESET_TICKET } from "./tickets.action";
 
-export interface TicketsState extends EntityState<Ticket> {
-  selectedId: string | null;
-  purchasing: boolean;
-  verifying: boolean;
-  verifyResult: VerifyResult | null;
+export interface TicketState {
+  issuedTicket: Ticket | null;
+  summary: DailySummary | null;
+  summaryLoading: boolean; 
   loading: boolean;
   error: string | null;
 }
 
-export const adapter: EntityAdapter<Ticket> = createEntityAdapter<Ticket>();
-
-const initialState: TicketsState = adapter.getInitialState({
-  selectedId: null,
-  purchasing: false,
-  verifying: false,
-  verifyResult: null,
+export const initialTicketState: TicketState = {
+  issuedTicket: null,
+  summary: null,
+  summaryLoading: false, 
   loading: false,
   error: null,
-});
+};
 
 export const ticketsReducer = createReducer(
-  initialState,
-
-  on(TicketsActions.loadMyTickets, (state) => ({
-    ...state,
-    loading: true,
-    error: null,
-  })),
-  on(TicketsActions.loadMyTicketsSuccess, (state, { tickets }) =>
-    adapter.setAll(tickets, { ...state, loading: false }),
-  ),
-  on(TicketsActions.loadMyTicketsFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error,
+  initialTicketState,
+   on(ISSUE_TICKET, (state) => ({
+    ...state, loading: true, error: null
   })),
 
-  on(TicketsActions.purchaseTicket, (state) => ({
-    ...state,
-    purchasing: true,
-    error: null,
-  })),
-  on(TicketsActions.purchaseTicketSuccess, (state) => ({
-    ...state,
-    purchasing: false,
-  })),
-  on(TicketsActions.purchaseTicketFailure, (state, { error }) => ({
-    ...state,
-    purchasing: false,
-    error,
+  on(ISSUE_TICKET_SUCCESS, (state, { ticket }) => ({
+    ...state, loading: false, issuedTicket: ticket
   })),
 
-  on(TicketsActions.verifyTicket, (state) => ({
-    ...state,
-    verifying: true,
-    verifyResult: null,
-  })),
-  on(TicketsActions.verifyTicketSuccess, (state, { result }) => ({
-    ...state,
-    verifying: false,
-    verifyResult: result,
-  })),
-  on(TicketsActions.verifyTicketFailure, (state, { error }) => ({
-    ...state,
-    verifying: false,
-    error,
+  on(ISSUE_TICKET_FAILURE, (state, { error }) => ({
+    ...state, loading: false, error
   })),
 
-  on(TicketsActions.selectTicket, (state, { ticketId }) => ({
-    ...state,
-    selectedId: ticketId,
-  })),
-  on(TicketsActions.clearVerifyResult, (state) => ({
-    ...state,
-    verifyResult: null,
-  })),
-);
+  on(RESET_TICKET, () => initialTicketState),
 
-export const { selectAll, selectEntities } = adapter.getSelectors();
+  on(LOAD_TODAY_SUMMARY, (state) => ({
+  ...state,
+  summaryLoading: true,
+  error: null,
+})),
+
+on(LOAD_TODAY_SUMMARY_SUCCESS, (state, { summary }) => ({
+  ...state,
+  summaryLoading: false,
+  summary,
+})),
+
+on(LOAD_TODAY_SUMMARY_FAILURE, (state, { error }) => ({
+  ...state,
+  summaryLoading: false,
+  error,
+})),
+)
+

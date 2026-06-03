@@ -5,7 +5,7 @@ import { of, Observable, defer } from 'rxjs';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
 import { Auth, authState } from '@angular/fire/auth';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
-import { AuthActions } from './auth.actions';
+import * as AuthActions from './auth.actions';
 import { User } from '@core/interfaces/user.interface';
 import { AuthService } from '@core/services/auth.service';
 import { SHOW_TOAST } from '../toast/toast.actions';
@@ -25,14 +25,16 @@ export class AuthEffects {
 
   // Listen to Firebase auth state on app start
   initAuthListener$ = createEffect(() =>
-    defer(() => authState(this.auth)).pipe(
+    defer(() =>
+    runInInjectionContext(this.injector, () => authState(this.auth))
+    ).pipe(
       switchMap((firebaseUser) => {
         if (!firebaseUser) {
-          return of(AuthActions.userUnauthenticated());
+          return of(AuthActions.USER_UNAUTHENTICATED);
         }
         return this.loadProfile(firebaseUser.uid).pipe(
           map((user) =>
-            user ? AuthActions.userAuthenticated({ user }) : AuthActions.userUnauthenticated(),
+            user ? AuthActions.USER_AUTHENTICATED({ user }) : AuthActions.USER_UNAUTHENTICATED(),
           ),
         );
       }),
@@ -42,7 +44,7 @@ export class AuthEffects {
   // Send OTP
   sendOtp$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.sendOtp),
+      ofType(AuthActions.SEND_OTP),
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
           map(() => {
@@ -53,10 +55,10 @@ export class AuthEffects {
               severity: ToastSeverity.SUCCESS,
             })
            )
-            return AuthActions.sendOtpSuccess();
+            return AuthActions.SEND_OTP_SUCCESS;
           }),
           catchError((err) =>
-            of(AuthActions.sendOtpFailure({ error: this.friendlyAuthError(err) })),
+            of(AuthActions.SEND_OTP_FAILURE({ error: this.friendlyAuthError(err) })),
           ),
         ),
       ),
@@ -66,7 +68,7 @@ export class AuthEffects {
   // Verify OTP
   verifyOtp$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.verifyOtp),
+      ofType(AuthActions.VERIFY_OTP),
       switchMap(({ code }) =>
         this.authService.verifyOtp(code).pipe(
           map((user) => {            
@@ -77,7 +79,7 @@ export class AuthEffects {
               severity: ToastSeverity.SUCCESS,
             }))
 
-            return AuthActions.verifyOtpSuccess({ user });
+            return AuthActions.VERIFY_OTP_SUCCESS({ user });
           }),
           catchError((err) => {
             SHOW_TOAST({
@@ -85,7 +87,7 @@ export class AuthEffects {
               message: err,
               severity: ToastSeverity.ERROR,
             });
-            return of(AuthActions.verifyOtpFailure({ error: this.friendlyAuthError(err) }));
+            return of(AuthActions.VERIFY_OTP_FAILURE({ error: this.friendlyAuthError(err) }));
           }),
         ),
       ),
@@ -94,7 +96,7 @@ export class AuthEffects {
 
   resendOtp$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.resendOtp),
+      ofType(AuthActions.RESEND_OTP),
       switchMap(({ phoneNumber }) =>
         this.authService.sendOtp(phoneNumber).pipe(
           map(() => {            
@@ -104,7 +106,7 @@ export class AuthEffects {
               message: `We have successfully resent the OTP to ${phoneNumber}`,
               severity:ToastSeverity.SUCCESS,
             }))
-            return AuthActions.resendOtpSuccess();
+            return AuthActions.RESEND_OTP_SUCCESS();
           }),
           catchError((err) => {
            this.store.dispatch(
@@ -114,7 +116,7 @@ export class AuthEffects {
               severity: ToastSeverity.ERROR,
             })
            )
-            return of(AuthActions.resendOtpFailure({ error: this.friendlyAuthError(err) }));
+            return of(AuthActions.RESEND_OTP_FAILURE({ error: this.friendlyAuthError(err) }));
           }),
         ),
       ),
@@ -122,11 +124,11 @@ export class AuthEffects {
   );
   updateProfile$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.updateProfile),
+      ofType(AuthActions.UPDATE_USER_PROFILE),
       switchMap(({ uid, name, email }) =>
         this.authService.updateProfile(uid, { name, email }).pipe(
-          map(() => AuthActions.updateProfileSuccess()),
-          catchError((err) => of(AuthActions.updateProfileFailure({ error: err.message }))),
+          map(() => AuthActions.UPDATE_USER_PROFILE_SUCCESS()),
+          catchError((err) => of(AuthActions.UPDATE_USER_PROFILE_FAILURE({ error: err.message }))),
         ),
       ),
     ),
@@ -148,7 +150,7 @@ export class AuthEffects {
   // Sign out
   signOut$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.signOut),
+      ofType(AuthActions.SIGNOUT),
       switchMap(() =>
         this.authService.signOut().pipe(
           map(() => {
@@ -158,9 +160,9 @@ export class AuthEffects {
               message: `We have successfully Signed Out`,
               severity:ToastSeverity.SUCCESS,
             }))
-            return AuthActions.signOutSuccess();
+            return AuthActions.SIGNOUT_SUCCESS();
           }),
-          catchError(() => of(AuthActions.signOutFailure())),
+          catchError(() => of(AuthActions.SIGNOUT_FAILURE())),
         ),
       ),
     ),
@@ -169,7 +171,7 @@ export class AuthEffects {
   signOutSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.signOutSuccess),
+        ofType(AuthActions.SEND_OTP_SUCCESS),
         tap(() => this.router.navigate(['/auth/login'])),
       ),
     { dispatch: false },

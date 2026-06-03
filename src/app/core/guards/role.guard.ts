@@ -1,15 +1,10 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, take } from 'rxjs/operators';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { UserRole } from '@core/interfaces/user.interface';
-import { selectUserRole } from '@core/store/auth/auth.selectors';
+import { selectAuthInitialized, selectUserRole } from '@core/store/auth/auth.selectors';
 
-/**
- * Usage in routes:
- * canActivate: [authGuard, roleGuard(['admin'])]
- * canActivate: [authGuard, roleGuard(['customer'])]
- */
 export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return () => {
     const store = inject(Store);
@@ -20,15 +15,15 @@ export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
+      cashier: '/cashier/dashboard',
     };
 
-    return store.select(selectUserRole).pipe(
+    return store.select(selectAuthInitialized).pipe(
+      filter((initialized) => initialized), // 👈 wait for Firebase to resolve
       take(1),
+      switchMap(() => store.select(selectUserRole).pipe(take(1))), // 👈 then check role
       map((role) => {
-        // Role is allowed — let them through
         if (role && allowedRoles.includes(role)) return true;
-
-        // Authenticated but wrong role — send to their own portal
         return router.createUrlTree([destinations[role ?? 'customer']]);
       }),
     );
