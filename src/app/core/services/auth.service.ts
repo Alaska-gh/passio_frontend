@@ -19,7 +19,7 @@ import {
   updateDoc,
   getDoc,
 } from '@angular/fire/firestore';
-import { Observable, from, switchMap, of, tap, throwError, map, defer, catchError } from 'rxjs';
+import { Observable, from, switchMap, of, tap, throwError, map, defer, catchError, take } from 'rxjs';
 import { User, UserRole } from '@core/interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -78,6 +78,7 @@ export class AuthService {
           }),
           tap((user) => {
             sessionStorage.removeItem('rgh_pending_phone');
+            localStorage.setItem('passio_logedin_user', JSON.stringify(user))
             this.redirectByRole(user.role);
           })),
       ),
@@ -100,6 +101,7 @@ export class AuthService {
   }
 
   signOut(): Observable<void> {
+    localStorage.removeItem('passio_logedin_user')
     return from(signOut(this.auth));
   }
 
@@ -114,7 +116,9 @@ export class AuthService {
     return defer(() =>
       runInInjectionContext(this.injector, () => {
         const ref = doc(this.firestore, 'users', uid);
-        return docData(ref, { idField: 'uid' }) as Observable<User>;
+        return (docData(ref, { idField: 'uid' }) as Observable<User>).pipe(
+          take(1)
+        );
       }),
     );
   }
@@ -152,7 +156,7 @@ export class AuthService {
       admin: '/admin/dashboard',
       driver: '/driver/schedule',
       conductor: '/conductor/scanner',
-      cashier: '/cashier/issue-ticket',
+      cashier: '/cashier',
     };
 
     this.router.navigate([routes[role]]);

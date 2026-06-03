@@ -11,7 +11,7 @@ import {
   increment,
   runTransaction,
 } from '@angular/fire/firestore';
-import { Ticket, Trip } from '@core/interfaces';
+import { DailySummary, Ticket, Trip } from '@core/interfaces';
 import { Observable, from, switchMap, map, defer } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -55,4 +55,38 @@ export class TicketService {
       })
     );
   }
+
+  getTodaySummary(cashierUid: string): Observable<DailySummary> {
+  return defer(() =>
+    runInInjectionContext(this.injector, () => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const ticketsRef = collection(this.firestore, 'tickets');
+      const q = query(
+        ticketsRef,
+        where('issuedBy', '==', cashierUid),
+        where('travelDate', '==', todayStr)
+      );
+
+      return from(getDocs(q)).pipe(
+        map((snapshot) => {
+          if (snapshot.empty) {
+            return { totalTickets: 0, totalRevenue: 0, totalSeats: 0, lastTicket: null };
+          }
+
+          const tickets = snapshot.docs.map(d => ({
+            id: d.id,
+            ...d.data() as Omit<Ticket, 'id'>
+          })) as Ticket[];
+
+          return {
+            totalTickets: tickets.length,
+            totalRevenue: tickets.reduce((sum, t) => sum + t.totalAmount, 0),
+            totalSeats: tickets.reduce((sum, t) => sum + t.numberOfSeats, 0),
+            lastTicket: tickets[tickets.length - 1] ?? null,
+          };
+        })
+      );
+    })
+  );
+}
 }

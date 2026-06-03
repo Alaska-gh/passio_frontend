@@ -26,15 +26,15 @@ export class RouteService {
     return of([
       {
         id: '1',
-        origin: 'Accra',
-        destination: 'Kumasi',
+        origin: 'Koforidua',
+        destination: 'Circle',
         stops: [
           { name: 'Nsawam' },
           { name: 'Nkawkaw' }
         ] as RouteStop[],
         distanceKm: 250,
         estimatedDurationMin: 240,
-        fareGHS: 120,
+        fareGHS: 50,
         active: true,
         destinationLat: 6.6885,
         destinationLng: -1.6244,
@@ -43,12 +43,24 @@ export class RouteService {
       },
       {
         id: '2',
-        origin: 'Accra',
-        destination: 'Takoradi',
+        origin: 'Koforidua',
+        destination: 'Accra',
         stops: [],
         distanceKm: 220,
         estimatedDurationMin: 210,
-        fareGHS: 100,
+        fareGHS: 50,
+            times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+
+        active: true
+      },
+      {
+        id: '2',
+        origin: 'Koforidua',
+        destination: 'Kasoa',
+        stops: [],
+        distanceKm: 220,
+        estimatedDurationMin: 210,
+        fareGHS: 56,
             times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
 
         active: true

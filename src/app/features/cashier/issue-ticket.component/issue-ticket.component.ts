@@ -29,7 +29,7 @@ export class IssueTicketComponent implements OnInit{
   passengerName = '';
   passengerPhone = '';
   numberOfSeats = 1;
-  paymentMethod: 'mtn' | 'vodafone' = 'mtn';
+  paymentMethod: 'mtn' | 'telecel' = 'mtn';
   mobileMoneyNumber = '';
   today = new Date().toISOString().split('T')[0];
   currentTrip$!: Observable<Trip | null>;
@@ -67,6 +67,7 @@ export class IssueTicketComponent implements OnInit{
         debounceTime(300),
         takeUntil(this.destroy$)
       ).subscribe(() => this.loadTrip());
+      this.travelDate = this.today
   }
 
   get totalAmount(): number {
@@ -114,10 +115,7 @@ export class IssueTicketComponent implements OnInit{
     }
   }
 
-  private loadTrip() {
-    console.log('Load trip called');
-this.currentTrip$.subscribe((trip) => console.log(trip)
-)    
+  private loadTrip() {    
     if (!this.selectedRoute || !this.travelDate || !this.timeSlot) return;
     console.log('Load trip action Dispatched');
     
@@ -138,7 +136,7 @@ this.currentTrip$.subscribe((trip) => console.log(trip)
     const ticket: Ticket = {
       ticketNumber: this.ticketService.generateTicketNumber(),
       tripId,
-      route: this.selectedRoute.destination,
+      route: `${this.selectedRoute.origin} → ${this.selectedRoute.destination}`,
       origion: this.selectedRoute.origin,
       destination: this.selectedRoute.destination,
       travelDate: this.travelDate,

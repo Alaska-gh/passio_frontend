@@ -14,8 +14,15 @@ export interface Ticket {
   numberOfSeats: number;
   pricePerSeat: number;
   totalAmount: number;
-  paymentMethod: 'mtn' | 'vodafone';
+  paymentMethod: 'mtn' | 'telecel';
   mobileMoneyNumber: string;
   issuedBy: string;
   issuedAt: Date;
+}
+
+export interface DailySummary {
+  totalTickets: number;
+  totalRevenue: number;
+  totalSeats: number;
+  lastTicket: Ticket | null;
 }
