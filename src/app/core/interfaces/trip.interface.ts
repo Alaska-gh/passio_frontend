@@ -6,10 +6,12 @@ export interface Trip {
   origin: string;
   destination: string;
   date: string;
-  time: string;
+  queueOrder: number | null
   totalSeats: number;
   bookedSeats: number;
   availableSeats: number;
   pricePerSeat: number;
-  // buss: Bus
+  busId: string
+  busPlateNumber: string
+  status: 'open' | 'full' | 'departed';
 }

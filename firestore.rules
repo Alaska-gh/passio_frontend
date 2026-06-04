@@ -21,9 +21,9 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /buses/{busId} {
+    match /busses/{busId} {
       allow read:  if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isCashier();
     }
 
     match /routes/{routeId} {
@@ -51,6 +51,13 @@ service cloud.firestore {
     allow update: if isAdmin() || isCashier();
     allow delete: if false;
   }
+
+   match /loadingSystem/{docId} {
+      allow read:   if isAdmin() || isCashier();
+      allow update: if isAdmin() || isCashier(); // rotation on ticket issue
+      allow create: if isAdmin();                // only admin sets up initial config
+      allow delete: if false;
+    }
 
     match /queue/{docId} {
       allow read, write: if false;

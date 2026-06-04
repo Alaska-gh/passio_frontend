@@ -75,7 +75,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.store
       .select(selectCurrentUser)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((user) => console.log(user));
+      .subscribe();
   }
 
   ngOnDestroy(): void {

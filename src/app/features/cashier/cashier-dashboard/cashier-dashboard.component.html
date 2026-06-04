@@ -27,24 +27,23 @@
   <ng-container *ngIf="!(summaryLoading$ | async)">
     <ng-container *ngIf="summary$ | async as summary">
 
-      <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
-
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-3"> 
         <div class="bg-white rounded-2xl p-4 shadow-sm">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Tickets Today</p>
-          <p class="text-3xl font-bold text-gray-800 mt-1">{{ summary.totalTickets }}</p>
-          <p class="text-xs text-gray-400 mt-1">issued by you</p>
+          <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalTickets }}</p>
+          <p class="text-xs text-gray-400 mt-1">Issued by you</p>
         </div>
 
         <div class="bg-white rounded-2xl p-4 shadow-sm">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Revenue Today</p>
           <p class="text-3xl font-bold text-orange-600 mt-1">GHS {{ summary.totalRevenue }}</p>
-          <p class="text-xs text-gray-400 mt-1">total collected</p>
+          <p class="text-xs text-gray-400 mt-1">Total collected</p>
         </div>
 
         <div class="bg-white rounded-2xl p-4 shadow-sm col-span-2 md:col-span-1">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Seats Sold</p>
-          <p class="text-3xl font-bold text-gray-800 mt-1">{{ summary.totalSeats }}</p>
-          <p class="text-xs text-gray-400 mt-1">across all routes</p>
+          <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalSeats }}</p>
+          <p class="text-xs text-gray-400 mt-1">Across all routes</p>
         </div>
 
       </div>
@@ -60,9 +59,9 @@
               {{ summary.lastTicket.passengerName }}
             </p>
             <p class="text-xs text-gray-400 mt-0.5">{{ summary.lastTicket.route }}</p>
-            <p class="text-xs text-gray-400">
+            <!-- <p class="text-xs text-gray-400">
               {{ summary.lastTicket.timeSlot }} · {{ summary.lastTicket.numberOfSeats }} seat(s)
-            </p>
+            </p> -->
           </div>
           <div class="text-right">
             <p class="font-bold text-green-600">GHS {{ summary.lastTicket.totalAmount }}</p>

@@ -5,10 +5,9 @@ export interface Ticket {
   ticketNumber: string;
   tripId: string;
   route: string;
-  origion: string;
+  origin: string;
   destination: string;
   travelDate: string;
-  timeSlot: string;
   passengerName: string;
   passengerPhone: string;
   numberOfSeats: number;

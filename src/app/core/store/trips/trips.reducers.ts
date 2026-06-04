@@ -2,8 +2,8 @@ import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Trip } from '@core/interfaces/trip.interface';
 import { Ticket } from '@core/interfaces';
-import {  LOAD_TRIP, LOAD_TRIPS_FAILURE, LOAD_TRIPS_SUCCESS } from './trips.actions';
 import { adapter } from '../schedules/schedules.reducers';
+import { LOAD_CURRENT_TRIP, LOAD_CURRENT_TRIP_FAILURE, LOAD_CURRENT_TRIP_SUCCESS, RESET_TRIP } from './trips.actions';
 export interface TripState {
   currentTrip: Trip | null;
   issuedTicket: Ticket | null;
@@ -23,20 +23,27 @@ export const initialTicketState: TripState = {
 export const tripsReducer = createReducer(
   initialTicketState,
 
-    on(LOAD_TRIP, (state) => ({
+    on(LOAD_CURRENT_TRIP, (state) => ({
     ...state, tripLoading: true, error: null, currentTrip: null
   })),
 
-  on(LOAD_TRIPS_SUCCESS, (state, { trip }) => {
+  on(LOAD_CURRENT_TRIP_SUCCESS, (state, { trip }) => {
     console.log(trip);
     
   return {
     ...state, tripLoading: false, currentTrip: trip
   }}),
 
-  on(LOAD_TRIPS_FAILURE, (state, { error }) => ({
+  on(LOAD_CURRENT_TRIP_FAILURE, (state, { error }) => ({
     ...state, tripLoading: false, error
   })),
+
+  on(RESET_TRIP, (state) => ({
+  ...state,
+  currentTrip: null,
+  tripLoading: false,
+  tripError: null,
+}))
 );
 
 export const { selectAll } = adapter.getSelectors();

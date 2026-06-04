@@ -8,11 +8,11 @@ import { GET_ACTIVE_ROUTES } from '@core/store/routes/route.actions';
 import { selectActiveRoutes } from '@core/store/routes/route.selectors';
 import { ISSUE_TICKET, RESET_TICKET } from '@core/store/tickets/tickets.action';
 import { selectIssuedTicket, selectTicketError, selectTicketLoading } from '@core/store/tickets/tickets.selectors';
-import { LOAD_TRIP } from '@core/store/trips/trips.actions';
 import { selectCurrentTrip, selectTripLoading } from '@core/store/trips/trips.selectors';
 import { Store } from '@ngrx/store';
-import { debounceTime, Observable, Subject, takeUntil } from 'rxjs';
+import { debounceTime, Observable, Subject, take, takeUntil } from 'rxjs';
 import { Button } from "primeng/button";
+import { LOAD_CURRENT_TRIP, RESET_TRIP } from '@core/store/trips/trips.actions';
 
 @Component({
   selector: 'app-issue-ticket.component',
@@ -25,7 +25,6 @@ export class IssueTicketComponent implements OnInit{
   routes$ = this.store.select(selectActiveRoutes);
   selectedRoute: BusRoute | null = null;
   travelDate = '';
-  timeSlot = '';
   passengerName = '';
   passengerPhone = '';
   numberOfSeats = 1;
@@ -34,7 +33,6 @@ export class IssueTicketComponent implements OnInit{
   today = new Date().toISOString().split('T')[0];
   currentTrip$!: Observable<Trip | null>;
   issuedTicket$!: Observable<Ticket | null>;
-  bus!: Bus | null
   loading$!: Observable<boolean>;
   tripLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
@@ -88,7 +86,6 @@ export class IssueTicketComponent implements OnInit{
     return !!(
       this.selectedRoute &&
       this.travelDate &&
-      this.timeSlot &&
       this.passengerName.trim() &&
       isPassengerPhoneValid &&
       isMobileMoneyNumberValid &&
@@ -97,11 +94,12 @@ export class IssueTicketComponent implements OnInit{
   }
 
 
-  onRouteChange(label: string) {
-    this.routes$.subscribe((route) => {
-      this.selectedRoute = route.find(r => r.destination === label) || null;
-    })
-    this.timeSlot = '';
+   onRouteChange(routeId: string) {
+    // Use snapshot via take(1) instead of a raw subscription
+    this.store.dispatch(RESET_TRIP());
+    this.routes$.pipe(take(1), takeUntil(this.destroy$)).subscribe(routes => {
+      this.selectedRoute = routes.find(r => r.id === routeId) || null;
+    });
     this.store.dispatch(RESET_TICKET());
     this.triggerTripLoad();
   }
@@ -110,37 +108,37 @@ export class IssueTicketComponent implements OnInit{
   onTimeChange() { this.triggerTripLoad(); }
 
   private triggerTripLoad() {
-    if (this.selectedRoute && this.travelDate && this.timeSlot) {      
+    if (this.selectedRoute && this.travelDate) {
       this.tripTrigger$.next();
     }
   }
 
-  private loadTrip() {    
-    if (!this.selectedRoute || !this.travelDate || !this.timeSlot) return;
-    console.log('Load trip action Dispatched');
+  private loadTrip() {
+    console.log('load trip method called');
+    console.log('loadTrip called', new Date().getTime());
     
-    this.store.dispatch(LOAD_TRIP({
-      route: this.selectedRoute.destination,
-      origion: this.selectedRoute.origin,
+    if (!this.selectedRoute || !this.travelDate) return;
+    console.log('dispatching load trip action');
+    
+    this.store.dispatch(LOAD_CURRENT_TRIP({
+      route: `${this.selectedRoute.origin} → ${this.selectedRoute.destination}`,
+      origin: this.selectedRoute.origin,
       destination: this.selectedRoute.destination,
       date: this.travelDate,
-      time: this.timeSlot,
       pricePerSeat: this.selectedRoute.fareGHS,
-      // bus: this.bus!
     }));
   }
 
-  onIssueTicket(tripId: string) {
+    onIssueTicket(trip: Trip) {
     if (!this.isFormValid || !this.selectedRoute) return;
 
     const ticket: Ticket = {
       ticketNumber: this.ticketService.generateTicketNumber(),
-      tripId,
+      tripId: trip.id!,
       route: `${this.selectedRoute.origin} → ${this.selectedRoute.destination}`,
-      origion: this.selectedRoute.origin,
+      origin: this.selectedRoute.origin,
       destination: this.selectedRoute.destination,
       travelDate: this.travelDate,
-      timeSlot: this.timeSlot,
       passengerName: this.passengerName.trim(),
       passengerPhone: this.passengerPhone.trim(),
       numberOfSeats: this.numberOfSeats,
@@ -153,16 +151,26 @@ export class IssueTicketComponent implements OnInit{
       status: 'active',
     };
 
-    this.store.dispatch(ISSUE_TICKET({ ticket, tripId }));
+    this.store.dispatch(ISSUE_TICKET({
+      ticket,
+      tripId: trip.id!,
+      busId: trip.busId,
+      queueOrder: trip.queueOrder!,
+      route: trip.route,
+      origin: trip.origin,
+      destination: trip.destination,
+      date: trip.date,
+      pricePerSeat: trip.pricePerSeat,
+    }));
   }
 
    printTicket() { window.print(); }
 
     resetForm() {
     this.store.dispatch(RESET_TICKET());
+    this.store.dispatch(RESET_TRIP());
     this.selectedRoute = null;
-    this.travelDate = '';
-    this.timeSlot = '';
+    this.travelDate = this.today;
     this.passengerName = '';
     this.passengerPhone = '';
     this.numberOfSeats = 1;

@@ -24,15 +24,12 @@ export const activeRoutesReducer = createReducer(
         loadingRoutes: true
     }))),
 
-    on(GET_ACTIVE_ROUTES_SUCCESS, ((state, {routes}) => {
-        console.log(routes);
-        
-        return {
+    on(GET_ACTIVE_ROUTES_SUCCESS, ((state, {routes}) => ({
         ...state,
         loadingRoutes: false,
         routes
-    }
-    })),
+    })
+    )),
     on(GET_ACTIVE_ROUTES_FAILURE, ((state, {err}) =>({
         ...state,
         loadingRoutes: false,

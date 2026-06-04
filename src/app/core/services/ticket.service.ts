@@ -26,35 +26,35 @@ export class TicketService {
     return `${prefix}-${timestamp}-${random}`;
   }
 
-  issueTicket(ticket: Ticket, tripId: string): Observable<string> {
-    return defer(() =>
-      runInInjectionContext(this.injector, () => {
-        const tripRef = doc(this.firestore, 'trips', tripId);
-        const ticketsRef = collection(this.firestore, 'tickets');
+  // issueTicket(ticket: Ticket, tripId: string): Observable<string> {
+  //   return defer(() =>
+  //     runInInjectionContext(this.injector, () => {
+  //       const tripRef = doc(this.firestore, 'trips', tripId);
+  //       const ticketsRef = collection(this.firestore, 'tickets');
 
-        return from(
-          runTransaction(this.firestore, async (transaction) => {
-            const tripSnap = await transaction.get(tripRef);
-            if (!tripSnap.exists()) throw new Error('Trip not found');
+  //       return from(
+  //         runTransaction(this.firestore, async (transaction) => {
+  //           const tripSnap = await transaction.get(tripRef);
+  //           if (!tripSnap.exists()) throw new Error('Trip not found');
 
-            const trip = tripSnap.data() as Trip;
-            if (trip.availableSeats < ticket.numberOfSeats) {
-              throw new Error(`Only ${trip.availableSeats} seats available`);
-            }
+  //           const trip = tripSnap.data() as Trip;
+  //           if (trip.availableSeats < ticket.numberOfSeats) {
+  //             throw new Error(`Only ${trip.availableSeats} seats available`);
+  //           }
 
-            const newTicketRef = doc(ticketsRef);
-            transaction.set(newTicketRef, { ...ticket, issuedAt: serverTimestamp() });
-            transaction.update(tripRef, {
-              bookedSeats: increment(ticket.numberOfSeats),
-              availableSeats: increment(-ticket.numberOfSeats),
-            });
+  //           const newTicketRef = doc(ticketsRef);
+  //           transaction.set(newTicketRef, { ...ticket, issuedAt: serverTimestamp() });
+  //           transaction.update(tripRef, {
+  //             bookedSeats: increment(ticket.numberOfSeats),
+  //             availableSeats: increment(-ticket.numberOfSeats),
+  //           });
 
-            return newTicketRef.id;
-          })
-        );
-      })
-    );
-  }
+  //           return newTicketRef.id;
+  //         })
+  //       );
+  //     })
+  //   );
+  // }
 
   getTodaySummary(cashierUid: string): Observable<DailySummary> {
   return defer(() =>

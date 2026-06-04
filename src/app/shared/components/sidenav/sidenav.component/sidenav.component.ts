@@ -50,11 +50,8 @@ export class SidenavComponent {
       .subscribe();
   }
 
-  private setMenuItems() {
-    console.log("User", this.user);
-    
+  private setMenuItems() {    
     if (!this.user) return;
-     console.log('Setting menu items');
     if (this.user.role === 'admin') {
       this.navItems = [
         {
@@ -228,9 +225,14 @@ export class SidenavComponent {
           routerLink: '/cashier/dashboard',
         },
         {
-          label: 'Issue Tickect',
+          label: 'Issue Ticket',
           icon: 'ticket',
           routerLink: '/cashier/issue-ticket',
+        },
+        {
+          label: 'Recieve Parcel',
+          icon: 'parcel',
+          routerLink: '/cashier/recieve-parcel'
         },
       ];
     }

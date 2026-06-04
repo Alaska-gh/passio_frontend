@@ -3,11 +3,15 @@ import { createAction, props } from "@ngrx/store";
 
 export const ISSUE_TICKET = createAction(
   '[Tickets] Issue ticket',
-   props<{ ticket: Ticket; tripId: string }>()
+   props<{ 
+    ticket: Ticket; 
+    tripId: string; busId: string; queueOrder: number; 
+     route: string; origin: string; 
+     destination: string; date: string; pricePerSeat: number }>()
 )
 export const ISSUE_TICKET_SUCCESS = createAction(
   '[Tickets] Issue Ticket Success',
-   props<{ ticket: Ticket }>()
+   props<{ ticket: Ticket & { id: string }; rotated: boolean }>()
 )
 export const ISSUE_TICKET_FAILURE = createAction(
   '[Tickets] Issue Ticket Failure',

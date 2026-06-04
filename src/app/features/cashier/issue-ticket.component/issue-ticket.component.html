@@ -18,35 +18,25 @@
             class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-500"
             (change)="onRouteChange($any($event.target).value)">
             <option value="">-- Select Route --</option>
-            @for (route of routes$ | async ; track $index) {
-                <option  [value]="route.destination">
-                    {{ route.origin }} → {{ route.destination }} — GHS {{ route.fareGHS }}/seat
-                </option>
+            @for (route of routes$ | async; track route.id) {
+              <option [value]="route.id">
+                {{ route.origin }} → {{ route.destination }} — GHS {{ route.fareGHS }}/seat
+              </option>
             }
           </select>
         </div>
 
-        <!-- Date and Time -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Travel Date</label>
-            <input type="date" [min]="today" [(ngModel)]="travelDate"
-              (ngModelChange)="onDateChange()"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Departure</label>
-            <select [(ngModel)]="timeSlot" [disabled]="!selectedRoute"
-              (ngModelChange)="onTimeChange()"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-500 disabled:bg-gray-100">
-              <option value="">-- Time --</option>
-              <option *ngFor="let time of selectedRoute?.times" [value]="time">{{ time }}</option>
-            </select> 
-          </div>
+        <!-- Date -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Travel Date</label>
+          <input type="date" [min]="today" [(ngModel)]="travelDate"
+            (ngModelChange)="onDateChange()"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-500" />
         </div>
 
         <!-- Seat Availability -->
-        <div *ngIf="tripLoading$ | async" class="text-sm text-gray-400 flex items-center gap-2">
+        <div *ngIf="tripLoading$ | async"
+          class="text-sm text-gray-400 flex items-center gap-2">
           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
@@ -54,11 +44,22 @@
           Checking seat availability...
         </div>
 
+        <!-- No active bus -->
+        <div *ngIf="(error$ | async) as tripError"
+          class="bg-orange-50 border border-orange-200 text-orange-700 text-sm rounded-lg px-4 py-3">
+          {{ tripError }}
+        </div>
+
+        <!-- Trip seat display -->
         <div *ngIf="(currentTrip$ | async) as trip"
           class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 text-sm">
-          <span class="text-gray-600">Seats available</span>
-          <span class="font-bold"
-            [ngClass]="trip.availableSeats > 10 ? 'text-green-600' : trip.availableSeats > 0 ? 'text-gray-500' : 'text-red-600'">
+          <div>
+            <span class="text-gray-600">Seats available</span>
+            <p class="text-xs text-gray-400 mt-0.5">Bus · {{ trip.busPlateNumber }}</p>
+          </div>
+          <span class="font-bold text-lg"
+            [ngClass]="trip.availableSeats > 5 ? 'text-green-600' :
+                       trip.availableSeats > 0 ? 'text-orange-500' : 'text-red-600'">
             {{ trip.availableSeats }} / {{ trip.totalSeats }}
           </span>
         </div>
@@ -107,7 +108,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">{{paymentMethod === 'mtn' ? 'Mobile Money' : 'Telecel Cash' }} Number</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            {{ paymentMethod === 'mtn' ? 'MTN Mobile Money' : 'Telecel Cash' }} Number
+          </label>
           <input type="tel" [(ngModel)]="mobileMoneyNumber" placeholder="024XXXXXXX"
             class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-500" />
         </div>
@@ -115,7 +118,9 @@
         <!-- Total -->
         <div *ngIf="selectedRoute"
           class="flex justify-between items-center bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
-          <span class="text-sm text-blue-700">{{ numberOfSeats }} seat(s) *  GHS {{ selectedRoute.fareGHS }}</span>
+          <span class="text-sm text-blue-700">
+            {{ numberOfSeats }} seat(s) × GHS {{ selectedRoute.fareGHS }}
+          </span>
           <span class="text-lg font-bold text-blue-800">GHS {{ totalAmount }}</span>
         </div>
 
@@ -127,19 +132,28 @@
 
         <!-- Submit -->
         <ng-container *ngIf="(currentTrip$ | async) as trip">
-            <p-button label="Issue Ticket" (onClick)="onIssueTicket(trip.id!)"
-             [disabled]="!isFormValid || (loading$ | async) || trip.availableSeats < numberOfSeats" 
-             [loading]="loading$ | async" styleClass="w-full bg-orange-600! text-white! border-none! hover:bg-orange-700!">
-            </p-button>
+          <p-button
+            label="Issue Ticket"
+            (onClick)="onIssueTicket(trip)"
+            [disabled]="!isFormValid || !!(loading$ | async) || trip.availableSeats < numberOfSeats"
+            [loading]="!!(loading$ | async)"
+            styleClass="w-full bg-orange-600! text-white! border-none! hover:bg-orange-700!">
+          </p-button>
           <p *ngIf="trip.availableSeats < numberOfSeats && trip.availableSeats > 0"
-            class="text-center text-xs text-orange-500">
+            class="text-center text-xs text-orange-500 mt-1">
             Only {{ trip.availableSeats }} seats available for this trip
           </p>
           <p *ngIf="trip.availableSeats === 0"
-            class="text-center text-xs text-red-500 font-semibold">
+            class="text-center text-xs text-red-500 font-semibold mt-1">
             This trip is fully booked
           </p>
         </ng-container>
+
+        <!-- No trip yet -->
+        <div *ngIf="!(currentTrip$ | async) && !(tripLoading$ | async) && selectedRoute && travelDate"
+          class="text-center text-sm text-red-600 py-3">
+          No active bus available for this route right now.
+        </div>
 
       </div>
     </ng-container>
@@ -150,7 +164,9 @@
 
         <div class="bg-green-600 text-white px-5 py-4 flex justify-between items-center">
           <span class="font-bold">Ticket Issued ✓</span>
-          <span class="text-xs font-mono bg-green-700 px-3 py-1 rounded-full">{{ ticket.ticketNumber }}</span>
+          <span class="text-xs font-mono bg-green-700 px-3 py-1 rounded-full">
+            {{ ticket.ticketNumber }}
+          </span>
         </div>
 
         <div class="p-5 grid grid-cols-2 gap-4 text-sm">
@@ -171,17 +187,13 @@
             <p class="font-semibold text-gray-800 mt-0.5">{{ ticket.travelDate }}</p>
           </div>
           <div>
-            <p class="text-gray-400 text-xs uppercase tracking-wide">Departure</p>
-            <p class="font-semibold text-gray-800 mt-0.5">{{ ticket.timeSlot }}</p>
-          </div>
-          <div>
             <p class="text-gray-400 text-xs uppercase tracking-wide">Seats</p>
             <p class="font-semibold text-gray-800 mt-0.5">{{ ticket.numberOfSeats }}</p>
           </div>
           <div>
             <p class="text-gray-400 text-xs uppercase tracking-wide">Payment</p>
             <p class="font-semibold text-gray-800 mt-0.5 capitalize">
-              {{ ticket.paymentMethod === 'mtn' ? 'MTN MoMo' : 'Vodafone Cash' }}
+              {{ ticket.paymentMethod === 'mtn' ? 'MTN MoMo' : 'Telecel Cash' }}
               · {{ ticket.mobileMoneyNumber }}
             </p>
           </div>
@@ -194,7 +206,7 @@
 
         <div class="px-5 pb-5 flex gap-3 justify-end no-print">
           <button (click)="resetForm()"
-            class="border border-orange-300 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+            class="border border-gray-300 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
             New Ticket
           </button>
           <button (click)="printTicket()"
