@@ -1,7 +1,6 @@
 import { Bus, Trip } from "@core/interfaces";
 import { createAction, props } from "@ngrx/store";
 
-// buses.actions.ts
 export const LOAD_BUSES = createAction('[Buses] Load Buses');
 
 export const LOAD_BUSES_SUCCESS = createAction('[Buses] Load Buses Success',

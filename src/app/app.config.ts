@@ -11,12 +11,10 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 // Firebase
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 import {
   getFirestore,
   provideFirestore,
-  connectFirestoreEmulator,
-  initializeFirestore,
 } from '@angular/fire/firestore';
 import { getFunctions, provideFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
 import { getStorage, provideStorage, connectStorageEmulator } from '@angular/fire/storage';
@@ -27,7 +25,6 @@ import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
 import { metaReducers, reducers } from '@core/store';
 import { AuthEffects } from '@core/store/auth/auth.effects';
-import { SchedulesEffects } from '@core/store/schedules/schedules.effects';
 import { BusesEffects } from '@core/store/buses/buses.effects';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
@@ -52,28 +49,22 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
-    // Router
     provideRouter(
       routes,
-      withComponentInputBinding(), // lets you bind route params as @Input()
+      withComponentInputBinding(),
       withViewTransitions(), // smooth page transitions
       withInMemoryScrolling({
         scrollPositionRestoration: 'top',
       })
     ),
-
-    // HTTP
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
 
-    //  Animations
     provideAnimations(),
 
-    //  NgRx Store
     provideStore(reducers, { metaReducers }), 
 
-    provideEffects([AuthEffects, SchedulesEffects, TripsEffects, TicketEffects, BusesEffects, ToastEffects, ActiveRouteEffects]),
+    provideEffects([AuthEffects, TripsEffects, TicketEffects, BusesEffects, ToastEffects, ActiveRouteEffects, BusesEffects]),
 
-    // Redux DevTools — only in dev mode
     provideStoreDevtools({
       maxAge: 25,
       logOnly: !isDevMode(),
@@ -81,7 +72,6 @@ export const appConfig: ApplicationConfig = {
       trace: false,
     }),
 
-    // Firebase
     provideFirebaseApp(() => initializeApp(environment.firebase)),
 
     provideAuth(() => {
@@ -110,7 +100,6 @@ export const appConfig: ApplicationConfig = {
 
     provideMessaging(() => getMessaging()),
 
-    // PWA Service Worker
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

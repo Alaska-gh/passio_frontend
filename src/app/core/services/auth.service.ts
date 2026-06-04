@@ -15,7 +15,6 @@ import {
   docData,
   setDoc,
   serverTimestamp,
-  getDocFromServer,
   updateDoc,
   getDoc,
 } from '@angular/fire/firestore';

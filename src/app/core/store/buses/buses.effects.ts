@@ -5,7 +5,6 @@ import { Store } from "@ngrx/store";
 import { catchError, map, of, switchMap, tap } from "rxjs";
 import { ADD_BUS, ADD_BUS_FAILURE, ADD_BUS_SUCCESS, LOAD_BUS_TRIP_HISTORY, LOAD_BUS_TRIP_HISTORY_FAILURE, LOAD_BUS_TRIP_HISTORY_SUCCESS, LOAD_BUSES, LOAD_BUSES_FAILURE, LOAD_BUSES_SUCCESS, SET_BUS_ACTIVE, SET_BUS_INACTIVE, SET_BUS_STATUS_FAILURE, SET_BUS_STATUS_SUCCESS, UPDATE_BUS, UPDATE_BUS_FAILURE, UPDATE_BUS_SUCCESS } from "./buses.actions";
 
-// buses.effects.ts
 @Injectable()
 export class BusesEffects {
   private actions$ = inject(Actions);

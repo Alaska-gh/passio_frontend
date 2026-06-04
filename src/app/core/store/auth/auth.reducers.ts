@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { User } from '@core/interfaces/user.interface';
-import { AuthActions } from './auth.actions';
+import * as AuthActions from './auth.actions';
 
 export interface AuthState {
   user: User | null;
@@ -23,38 +23,34 @@ const initialState: AuthState = {
 export const authReducer = createReducer(
   initialState,
 
-  // Send OTP
-  on(AuthActions.sendOtp, (state) => ({
+  on(AuthActions.SEND_OTP, (state) => ({
     ...state,
     loading: true,
     error: null,
     otpSent: false,
   })),
-  on(AuthActions.sendOtpSuccess, (state) => {
-    console.log('otp sent');
 
-    return {
-      ...state,
+  on(AuthActions.SEND_OTP_SUCCESS, (state) => ({
+   ...state,
       loading: false,
       otpSent: true,
-    };
-  }),
-  on(AuthActions.sendOtpFailure, (state, { error }) => ({
+  })),
+
+  on(AuthActions.SEND_OTP_FAILURE, (state, { error }) => ({
     ...state,
     loading: false,
     error,
     otpSent: false,
   })),
 
-  // Verify OTP
-  on(AuthActions.verifyOtp, (state) => ({
+  on(AuthActions.VERIFY_OTP, (state) => ({
     ...state,
     loading: true,
     error: null,
   })),
-  on(AuthActions.verifyOtpSuccess, (state, { user }) => {
-    console.log(user);
 
+  on(AuthActions.VERIFY_OTP_SUCCESS, (state, { user }) => {
+    console.log(user);
     return {
       ...state,
       loading: false,
@@ -62,63 +58,68 @@ export const authReducer = createReducer(
       error: null,
     };
   }),
-  on(AuthActions.verifyOtpFailure, (state, { error }) => ({
+
+  on(AuthActions.VERIFY_OTP_FAILURE, (state, { error }) => ({
     ...state,
     loading: false,
     error,
   })),
 
-  // Firebase auth state listener
-  on(AuthActions.userAuthenticated, (state, { user }) => ({
+  on(AuthActions.USER_AUTHENTICATED, (state, { user }) => ({
     ...state,
     user,
     initialized: true,
     loading: false,
   })),
-  on(AuthActions.userUnauthenticated, (state) => ({
+
+  on(AuthActions.USER_UNAUTHENTICATED, (state) => ({
     ...state,
     user: null,
     initialized: true,
     loading: false,
   })),
 
-  on(AuthActions.updateProfile, (state) => ({
+  on(AuthActions.UPDATE_USER_PROFILE, (state) => ({
     ...state,
     loading: true,
     error: null,
   })),
-  on(AuthActions.updateProfileSuccess, (state) => ({
+
+  on(AuthActions.UPDATE_USER_PROFILE_SUCCESS, (state) => ({
     ...state,
     loading: false,
   })),
-  on(AuthActions.updateProfileFailure, (state, { error }) => ({
+
+  on(AuthActions.UPDATE_USER_PROFILE_FAILURE, (state, { error }) => ({
     ...state,
     loading: false,
     error,
   })),
-  // Sign out
-  on(AuthActions.signOut, (state) => ({
+
+  on(AuthActions.SIGNOUT, (state) => ({
     ...state,
     loading: true,
   })),
-  on(AuthActions.signOutSuccess, (state) => ({
+
+  on(AuthActions.SIGNOUT_SUCCESS, (state) => ({
     ...state,
     user: null,
     loading: false,
     otpSent: false,
   })),
 
-  // Load profile
-  on(AuthActions.loadProfile, (state) => ({
+  on(AuthActions.LOAD_USER_PROFILE, (state) => ({
     ...state,
     loading: true,
   })),
-  on(AuthActions.loadProfileSuccess, (state, { user }) => ({
+
+  on(AuthActions.LOAD_USER_PROFILE_SUCCESS, (state, { user }) => ({
     ...state,
     user,
     loading: false,
   })),
-  on(AuthActions.loadProfileFailure, (state, { error }) => ({
+  
+  on(AuthActions.LOAD_USER_PROFILE_FAILURE, (state, { error }) => ({
     ...state,
     error,
     loading: false,

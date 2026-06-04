@@ -11,7 +11,7 @@ import {
 
 export interface TicketState {
   issuedTicket: Ticket | null;
-  summary: DailySummary | null;        // 👈 add
+  summary: DailySummary | null;
   summaryLoading: boolean; 
   loading: boolean;
   error: string | null;
@@ -19,7 +19,7 @@ export interface TicketState {
 
 export const initialTicketState: TicketState = {
   issuedTicket: null,
-  summary: null,                       // 👈 add
+  summary: null,
   summaryLoading: false, 
   loading: false,
   error: null,

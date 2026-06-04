@@ -21,7 +21,6 @@ import { Bus, Ticket } from '@core/interfaces';
 @Injectable({ providedIn: 'root' })
 export class TripService {
 
-
   private firestore = inject(Firestore);
   private injector = inject(Injector);
 
@@ -149,7 +148,7 @@ export class TripService {
           const wrapQuery = query(
             busesRef,
             where('status', '==', 'active'),
-            orderBy('queueOrder', 'asc')  // no limit — works for any fleet size
+            orderBy('queueOrder', 'asc')
           );
 
           return from(getDocs(wrapQuery)).pipe(
@@ -168,96 +167,6 @@ export class TripService {
     })
   );
 }
-  // In TripService — combine both operations
-
-// issueSeatAndSaveTicket(ticket: Ticket, tripId: string, busId: string,
-//   seatsToBook: number, currentQueueOrder: number, route: string,
-//   origin: string, destination: string, date: string,
-//   pricePerSeat: number
-// ): Observable<{ ticketId: string; trip: Trip; rotated: boolean }> {
-//   return defer(() =>
-//     runInInjectionContext(this.injector, () => {
-//       const tripRef = doc(this.firestore, 'trips', tripId);
-//       const currentBusRef = doc(this.firestore, 'busses', busId);
-//       const ticketsRef = collection(this.firestore, 'tickets');
-//       const newTicketRef = doc(ticketsRef);
-
-//       return this.getNextBus(currentQueueOrder).pipe(
-//         switchMap((nextBus) => {
-//           const nextBusRef = nextBus
-//             ? doc(this.firestore, 'busses', nextBus.id)
-//             : null;
-
-//           return from(
-//             runTransaction(this.firestore, async (transaction) => {
-//               const tripSnap = await transaction.get(tripRef);
-//               const busSnap = await transaction.get(currentBusRef);
-//               const nextBusSnap = nextBusRef ? await transaction.get(nextBusRef): null;
-//               const rotationSnap = await transaction.get(this.rotationRef);
-
-//               if (!tripSnap.exists()) throw new Error('Trip not found');
-//               if (!busSnap.exists()) throw new Error('Bus not found');
-//               if (!rotationSnap.exists()) throw new Error('Rotation config not found');
-
-//               const trip = tripSnap.data() as Trip;
-
-//               if (trip.availableSeats < seatsToBook) {
-//                 throw new Error(`Only ${trip.availableSeats} seats available`);
-//               }
-
-//               const newBookedSeats = trip.bookedSeats + seatsToBook;
-//               const newAvailableSeats = trip.availableSeats - seatsToBook;
-//               const isFull = newAvailableSeats === 0;
-
-//               // Update trip seats
-//               transaction.update(tripRef, {
-//                 bookedSeats: increment(seatsToBook),
-//                 availableSeats: increment(-seatsToBook),
-//                 status: isFull ? 'full' : 'open',
-//               });
-
-//               // Save ticket atomically with seat update
-//               transaction.set(newTicketRef, { ...ticket });
-
-//               if (isFull && nextBus) {
-//                  transaction.update(this.rotationRef, { movingBusId: nextBus.id });
-//               }
-
-//               return {
-//                 ticketId: newTicketRef.id,
-//                 updatedTrip: {
-//                   ...trip,
-//                   id: tripId,
-//                   bookedSeats: newBookedSeats,
-//                   availableSeats: newAvailableSeats,
-//                   status: isFull ? 'full' : 'open',
-//                 } as Trip,
-//                 isFull,
-//                 nextBus,
-//               };
-//             })
-//           ).pipe(
-//             switchMap(({ ticketId, updatedTrip, isFull, nextBus }) => {
-//               if (!isFull) {
-//                 return of({ ticketId, trip: updatedTrip, rotated: false });
-//               }
-
-//               if (!nextBus) {
-//                 console.warn('No next bus found for rotation');
-//                 return of({ ticketId, trip: updatedTrip, rotated: false });
-//               }
-
-//               return this.createTrip(nextBus, route, origin, destination, date, pricePerSeat).pipe(
-//                 map(() => ({ ticketId, trip: updatedTrip, rotated: true })),
-//                 tap(() => console.log('[Rotated to bus]', nextBus.id))
-//               );
-//             })
-//           );
-//         })
-//       );
-//     })
-//   );
-// }
 
 issueSeatAndSaveTicket(
   ticket: Ticket, tripId: string, busId: string,
@@ -323,7 +232,6 @@ issueSeatAndSaveTicket(
           return this.getNextBus(currentQueueOrder, busId).pipe( 
             switchMap((nextBus) => {
               if (!nextBus) {
-                  console.warn('All buses full — resetting rotation');
                   return from(updateDoc(this.rotationRef, { movingBusId: '' })).pipe(
                     map(() => ({ ticketId, trip: updatedTrip, rotated: false }))
                   );
@@ -344,16 +252,13 @@ issueSeatAndSaveTicket(
   );
 }
 
-  getCurrentTrip(route: string, origin: string, destination: string,
-   date: string, pricePerSeat: number): Observable<Trip | null> {
+getCurrentTrip(route: string, origin: string, destination: string,
+  date: string, pricePerSeat: number): Observable<Trip | null> {
   return this.getMovingBus().pipe(
-    tap(bus => console.log('[Moving Bus]', bus)),
     switchMap((movingBus) => {
       if (!movingBus) throw new Error('No active bus available for this route right now');
 
       return this.getOpenTrip(movingBus.id, route, date).pipe(
-        tap(trip => console.log('[getCurrentTrip] Found trip:', trip?.id,
-          'available:', trip?.availableSeats)),
         switchMap((existingTrip) => {
           if (existingTrip) return of(existingTrip);
 
@@ -391,7 +296,7 @@ reportReturn(busId: string): Observable<void> {
           return from(updateDoc(busRef, {
             status: 'active',
             queueOrder: newQueueOrder,
-            returnedAt: new Date(), // ✅ useful for audit/admin view
+            returnedAt: new Date(), // useful for audit/admin view
           }));
         })
       );

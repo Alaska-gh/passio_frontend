@@ -2,7 +2,6 @@ import { Bus, Trip } from "@core/interfaces";
 import { createReducer, on } from "@ngrx/store";
 import { ADD_BUS, ADD_BUS_FAILURE, ADD_BUS_SUCCESS, LOAD_BUS_TRIP_HISTORY, LOAD_BUS_TRIP_HISTORY_FAILURE, LOAD_BUS_TRIP_HISTORY_SUCCESS, LOAD_BUSES, LOAD_BUSES_FAILURE, LOAD_BUSES_SUCCESS, SET_BUS_STATUS_FAILURE, SET_BUS_STATUS_SUCCESS, UPDATE_BUS_SUCCESS } from "./buses.actions";
 
-// buses.reducer.ts
 export interface BusState {
   buses: Bus[];
   selectedBusTripHistory: Trip[];
@@ -51,7 +50,7 @@ export const busesReducer = createReducer(
   on(LOAD_BUS_TRIP_HISTORY_SUCCESS, (state, { trips }) => ({
     ...state, historyLoading: false, selectedBusTripHistory: trips
   })),
-  
+
   on(LOAD_BUS_TRIP_HISTORY_FAILURE, (state, { error }) => ({
     ...state, historyLoading: false, error
   })),

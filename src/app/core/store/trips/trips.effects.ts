@@ -33,9 +33,7 @@ export class TripsEffects {
                 message: error.message,
                 severity: ToastSeverity.WARN
               })
-            )
-            console.log(error.message);
-            
+            )            
            return of(LOAD_CURRENT_TRIP_FAILURE({ error: error.message }))}
           )
         )

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthActions } from '@core/store/auth/auth.actions';
-import { OnboardingComponent } from '@features/customer/onboarding/onboarding.component/onboarding.component';
+import * as AuthActions from '@core/store/auth/auth.actions';
 import { Store } from '@ngrx/store';
 import { Button } from 'primeng/button';
 
@@ -47,8 +46,7 @@ export class VerifyOtpComponent implements OnInit {
 
   verifyOtp() {
     const otp = Object.values(this.otpForm.value).join('');
-    console.log('OTP:', otp);
-    this.store.dispatch(AuthActions.verifyOtp({ code: otp }));
+    this.store.dispatch(AuthActions.VERIFY_OTP({ code: otp }));
   }
 
   resendOtp() {
@@ -56,21 +54,14 @@ export class VerifyOtpComponent implements OnInit {
       return;
     }
 
-    console.log(this.resendDisabled);
-
     const phoneNumber = sessionStorage.getItem('rgh_pending_phone');
-
-    console.log(phoneNumber);
 
     if (!phoneNumber) {
       // this.error = 'Session expired. Please start again.';
       return;
     }
-
     this.resendDisabled = true;
-    this.store.dispatch(AuthActions.resendOtp({ phoneNumber }));
-
-    console.log('Resending OTP...');
+    this.store.dispatch(AuthActions.RESEND_OTP({ phoneNumber }));
     this.startCountdown();
   }
 

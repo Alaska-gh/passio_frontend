@@ -10,11 +10,15 @@ import { ToastMessage } from '@core/interfaces/toastMessage.interface';
 @Injectable()
 export class ToastEffects {
 
+   constructor(
+    private actions$: Actions,
+    private messageService: MessageService,
+    private router: Router
+  ) { }
+
   showToast$ = createEffect(() => this.actions$.pipe(
     ofType(SHOW_TOAST),
-    tap(action => {
-        console.log('toast action dispatched');
-        
+    tap(action => {        
       const toastOptions: ToastMessage = {
         severity: action.severity ?? ToastSeverity.INFO,
         summary: action.title,
@@ -33,10 +37,4 @@ export class ToastEffects {
       }
     })
   ), { dispatch: false });
-
-  constructor(
-    private actions$: Actions,
-    private messageService: MessageService,
-    private router: Router
-  ) { }
 }

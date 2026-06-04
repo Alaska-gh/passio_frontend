@@ -9,6 +9,7 @@ export const GET_ACTIVE_ROUTES_SUCCESS = createAction(
     '[Customer Routes] Get Active Routes Success',
     props<{routes: BusRoute[]}>()
 )
+
 export const GET_ACTIVE_ROUTES_FAILURE= createAction(
     '[Customer Routes] Get Active RoutesFailure',
     props<{err: HttpErrorResponse}>()

@@ -11,8 +11,6 @@ import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Observable } from 'rxjs';
 
-
-
 @Component({
   selector: 'app-cashier-dashboard.component',
   imports: [CommonModule, CardModule, SkeletonModule, ButtonModule],
@@ -23,11 +21,10 @@ export class CashierDashboardComponent {
 
   private store = inject(Store);
   private router = inject(Router);
-  
+
   currentUser$ = this.store.select(selectCurrentUser);
   summary$: Observable<DailySummary | null> = this.store.select(selectSummary);
   summaryLoading$: Observable<boolean> = this.store.select(selectSummaryLoading);
-
 
   today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -38,12 +35,13 @@ export class CashierDashboardComponent {
   }
 
   getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 17) return 'afternoon';
-  return 'evening';
-}
-goToIssueTicket() {
-  this.router.navigate(['/cashier/issue-ticket']);
-}
+    const hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
+  }
+  
+  goToIssueTicket() {
+    this.router.navigate(['/cashier/issue-ticket']);
+  }
 }

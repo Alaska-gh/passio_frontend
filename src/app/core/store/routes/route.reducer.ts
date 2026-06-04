@@ -3,8 +3,6 @@ import { BusRoute } from "@core/interfaces";
 import { createReducer, on } from "@ngrx/store";
 import { GET_ACTIVE_ROUTES, GET_ACTIVE_ROUTES_FAILURE, GET_ACTIVE_ROUTES_SUCCESS } from "./route.actions";
 
-// export const activeRoutesStateKey = 'activeRoute'
-
 export interface activeRouteState{
     loadingRoutes: boolean,
     routes: BusRoute[]

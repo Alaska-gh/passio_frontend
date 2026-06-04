@@ -2,17 +2,12 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import {
   Firestore,
   collection,
-  addDoc,
-  doc,
   query,
   where,
   getDocs,
-  serverTimestamp,
-  increment,
-  runTransaction,
 } from '@angular/fire/firestore';
-import { DailySummary, Ticket, Trip } from '@core/interfaces';
-import { Observable, from, switchMap, map, defer } from 'rxjs';
+import { DailySummary, Ticket } from '@core/interfaces';
+import { Observable, from, map, defer } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
@@ -25,36 +20,6 @@ export class TicketService {
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     return `${prefix}-${timestamp}-${random}`;
   }
-
-  // issueTicket(ticket: Ticket, tripId: string): Observable<string> {
-  //   return defer(() =>
-  //     runInInjectionContext(this.injector, () => {
-  //       const tripRef = doc(this.firestore, 'trips', tripId);
-  //       const ticketsRef = collection(this.firestore, 'tickets');
-
-  //       return from(
-  //         runTransaction(this.firestore, async (transaction) => {
-  //           const tripSnap = await transaction.get(tripRef);
-  //           if (!tripSnap.exists()) throw new Error('Trip not found');
-
-  //           const trip = tripSnap.data() as Trip;
-  //           if (trip.availableSeats < ticket.numberOfSeats) {
-  //             throw new Error(`Only ${trip.availableSeats} seats available`);
-  //           }
-
-  //           const newTicketRef = doc(ticketsRef);
-  //           transaction.set(newTicketRef, { ...ticket, issuedAt: serverTimestamp() });
-  //           transaction.update(tripRef, {
-  //             bookedSeats: increment(ticket.numberOfSeats),
-  //             availableSeats: increment(-ticket.numberOfSeats),
-  //           });
-
-  //           return newTicketRef.id;
-  //         })
-  //       );
-  //     })
-  //   );
-  // }
 
   getTodaySummary(cashierUid: string): Observable<DailySummary> {
   return defer(() =>

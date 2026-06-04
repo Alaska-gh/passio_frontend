@@ -27,10 +27,10 @@ export class RouteService {
       {
         id: '1',
         origin: 'Koforidua',
-        destination: 'Circle',
+        destination: 'Accra',
         stops: [
-          { name: 'Nsawam' },
-          { name: 'Nkawkaw' }
+          { name: 'Madina' },
+          { name: 'Tema Station' }
         ] as RouteStop[],
         distanceKm: 250,
         estimatedDurationMin: 240,
@@ -38,32 +38,6 @@ export class RouteService {
         active: true,
         destinationLat: 6.6885,
         destinationLng: -1.6244,
-        times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
-
-      },
-      {
-        id: '2',
-        origin: 'Koforidua',
-        destination: 'Accra',
-        stops: [],
-        distanceKm: 220,
-        estimatedDurationMin: 210,
-        fareGHS: 50,
-            times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
-
-        active: true
-      },
-      {
-        id: '3',
-        origin: 'Koforidua',
-        destination: 'Kasoa',
-        stops: [],
-        distanceKm: 220,
-        estimatedDurationMin: 210,
-        fareGHS: 56,
-            times: ['05:00 AM', '07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
-
-        active: true
       }
     ]).pipe(delay(500));
    }

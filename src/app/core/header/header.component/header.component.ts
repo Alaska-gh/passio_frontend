@@ -5,15 +5,13 @@ import { Store } from '@ngrx/store';
 import {
   selectCurrentUser,
   selectIsAuthenticated,
-  selectUserName,
-  selectUserRole,
 } from '@core/store/auth/auth.selectors';
 import { Subject, takeUntil } from 'rxjs';
 import { UserRole } from '@core/interfaces';
 import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
-import { AuthActions } from '@core/store/auth/auth.actions';
+import * as AuthActions from '@core/store/auth/auth.actions';
 import { MenuItem } from 'primeng/api';
 
 @Component({
@@ -26,7 +24,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   isAuthenticated = false;
   userRole: UserRole | null = null;
-  userName: string | null = null;
+  userName!: string;
   items: MenuItem[] | undefined
 
 
@@ -57,25 +55,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   ]
 
-    this.store
-      .select(selectIsAuthenticated)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => (this.isAuthenticated = value));
+    this.store.select(selectIsAuthenticated).pipe(
+      takeUntil(this.destroy$)).subscribe(
+        (value) => (this.isAuthenticated = value));
 
-    this.store
-      .select(selectUserRole)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((role) => (this.userRole = role));
-
-    this.store
-      .select(selectUserName)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((name) => (this.userName = name));
-
-    this.store
-      .select(selectCurrentUser)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe();
+    this.store.select(selectCurrentUser).pipe(
+      takeUntil(this.destroy$)).subscribe(
+        (user) => {
+          if(user){
+            this.userRole = user?.role;
+            if(user.name)
+            this.userName = user.name
+          }
+        });
   }
 
   ngOnDestroy(): void {
@@ -84,6 +76,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   signOut() {
-    this.store.dispatch(AuthActions.signOut());
+    this.store.dispatch(AuthActions.SIGNOUT());
   }
 }

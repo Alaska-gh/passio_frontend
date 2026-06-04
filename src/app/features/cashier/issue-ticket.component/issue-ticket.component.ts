@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Bus, BusRoute, Ticket, Trip } from '@core/interfaces';
+import { BusRoute, Ticket, Trip } from '@core/interfaces';
 import { TicketService } from '@core/services/ticket.service';
 import { selectCurrentUser } from '@core/store/auth/auth.selectors';
 import { GET_ACTIVE_ROUTES } from '@core/store/routes/route.actions';
@@ -53,19 +53,19 @@ export class IssueTicketComponent implements OnInit{
     this.error$ = this.store.select(selectTicketError);
   }
 
-    ngOnInit() {
-      this.store.dispatch(GET_ACTIVE_ROUTES())
-      this.store.dispatch(RESET_TICKET());
-      this.store.select(selectCurrentUser).pipe(
-        takeUntil(this.destroy$))
-        .subscribe(user => { if (user) this.cashierUid = user.uid; });
+  ngOnInit() {
+    this.store.dispatch(GET_ACTIVE_ROUTES())
+    this.store.dispatch(RESET_TICKET());
+    this.store.select(selectCurrentUser).pipe(
+      takeUntil(this.destroy$)).subscribe(
+        user => { if (user) this.cashierUid = user.uid; });
 
-      // Debounce trip loading so it only fires when all 3 fields are set
-      this.tripTrigger$.pipe(
-        debounceTime(300),
-        takeUntil(this.destroy$)
-      ).subscribe(() => this.loadTrip());
-      this.travelDate = this.today
+    // Debounce trip loading so it only fires when all 3 fields are set
+    this.tripTrigger$.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.loadTrip());
+    this.travelDate = this.today
   }
 
   get totalAmount(): number {
@@ -94,8 +94,7 @@ export class IssueTicketComponent implements OnInit{
   }
 
 
-   onRouteChange(routeId: string) {
-    // Use snapshot via take(1) instead of a raw subscription
+  onRouteChange(routeId: string) {
     this.store.dispatch(RESET_TRIP());
     this.routes$.pipe(take(1), takeUntil(this.destroy$)).subscribe(routes => {
       this.selectedRoute = routes.find(r => r.id === routeId) || null;
@@ -114,12 +113,7 @@ export class IssueTicketComponent implements OnInit{
   }
 
   private loadTrip() {
-    console.log('load trip method called');
-    console.log('loadTrip called', new Date().getTime());
-    
-    if (!this.selectedRoute || !this.travelDate) return;
-    console.log('dispatching load trip action');
-    
+    if (!this.selectedRoute || !this.travelDate) return;    
     this.store.dispatch(LOAD_CURRENT_TRIP({
       route: `${this.selectedRoute.origin} → ${this.selectedRoute.destination}`,
       origin: this.selectedRoute.origin,
@@ -129,7 +123,7 @@ export class IssueTicketComponent implements OnInit{
     }));
   }
 
-    onIssueTicket(trip: Trip) {
+  onIssueTicket(trip: Trip) {
     if (!this.isFormValid || !this.selectedRoute) return;
 
     const ticket: Ticket = {

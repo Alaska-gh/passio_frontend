@@ -26,18 +26,15 @@ export class App implements OnInit {
   isAuthenticated = false;
   userRole!: string;
   destroy$ = new Subject<void>();
-  // open$ = this.store.select(selectSearchOpen);
 
-    readonly vm$ = combineLatest({
+  readonly vm$ = combineLatest({
     userRole: this.store.select(selectUserRole).pipe(
       map(role => role ?? 'customer')
     ),
     isAuthenticated: this.store.select(selectIsAuthenticated),
   });
 
-  constructor(private store: Store, private router: Router) {
-   
-  }
+  constructor(private store: Store) { }
 
   ngOnInit(): void {
 
@@ -60,7 +57,7 @@ export class App implements OnInit {
   }
 
   ngOnDestroy() {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

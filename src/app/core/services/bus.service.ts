@@ -1,6 +1,6 @@
 import { inject, Injectable, Injector, runInInjectionContext } from "@angular/core";
+import { addDoc, collection, doc, Firestore, getDocs, limit, orderBy, query, updateDoc, where } from "@angular/fire/firestore";
 import { Bus, Trip } from "@core/interfaces";
-import { addDoc, collection, doc, Firestore, getDocs, limit, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { defer, from, map, Observable, switchMap } from "rxjs";
 
 @Injectable({ providedIn: 'root' })

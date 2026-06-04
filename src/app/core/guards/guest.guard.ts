@@ -18,7 +18,7 @@ export const guestGuard: CanActivateFn = () => {
     admin: '/admin/dashboard',
     driver: '/driver/schedule',
     conductor: '/conductor/scanner',
-    cashier: '/cashier/issue-ticket'
+    cashier: '/cashier/dashboard'
   };
 
   return store.select(selectAuthInitialized).pipe(
