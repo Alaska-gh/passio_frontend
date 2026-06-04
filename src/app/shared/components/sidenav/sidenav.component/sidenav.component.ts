@@ -10,8 +10,8 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { DividerModule } from 'primeng/divider';
 import * as AuthActions from '@core/store/auth/auth.actions';
 import { filter, of, Subject, takeUntil, tap } from 'rxjs';
-import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/confirm-dialog.actions';
 import { PrimeNgSeverity } from '@core/interfaces/primeng-severity.enums';
+import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/dialog-config.actions';
 
 @Component({
   selector: 'app-sidenav',
@@ -26,7 +26,6 @@ export class SidenavComponent {
 
   navItems: MenuItem[] = [];
   user!: User;
-  unreadNotificationsCount!: number;
   destroy$ = new Subject<void>();
 
   private store = inject(Store)
@@ -37,6 +36,8 @@ export class SidenavComponent {
       filter((user): user is User => user !== null),
       takeUntil(this.destroy$),
       tap((user: User) => {
+        console.log(user);
+        
         this.user = user;
         this.setMenuItems()
       })
@@ -46,7 +47,28 @@ export class SidenavComponent {
   private setMenuItems() {    
     if (!this.user) return;
     if(this.user.role === 'admin'){
-      this.navItems = []
+       this.navItems = [
+        { 
+           label: 'Dashboard', 
+           icon: 'fas fa-home', 
+           routerLink: 'admin/dashboard'
+          },
+        { 
+          label: 'Bus management', 
+          icon: 'fas fa-car',
+          routerLink: 'admin/buses'
+         },
+        { 
+          label: 'Tickets', 
+          icon: 'fas fa-ticket', 
+          routerLink: 'admin/tickets'
+        },
+        { 
+          label: 'Routes', 
+          icon: 'fas fa-map',
+          routerLink: 'admin/routes'
+        },
+      ];
     }
 
     if (this.user.role === 'cashier') {

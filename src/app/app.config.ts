@@ -37,6 +37,7 @@ import { getApp } from 'firebase/app';
 import { TripsEffects } from '@core/store/trips/trips.effects';
 import { TicketEffects } from '@core/store/tickets/tickets.effects';
 import { ConfirmDialogEffects } from '@core/store/dialog/confirm-dialog.effects';
+import { DialogService } from 'primeng/dynamicdialog';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -115,6 +116,7 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     
-    ConfirmationService
+    ConfirmationService,
+    DialogService
   ],
 };

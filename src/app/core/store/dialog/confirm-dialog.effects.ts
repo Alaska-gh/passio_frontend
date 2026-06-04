@@ -3,8 +3,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ConfirmationService } from 'primeng/api';
 import { tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { OPEN_CONFIRM_DIALOG } from './confirm-dialog.actions';
 import { getConfirmDialogConfig } from '@core/interfaces/confirm-dialog-config-helper';
+import { OPEN_CONFIRM_DIALOG } from './dialog-config.actions';
 
 @Injectable()
 export class ConfirmDialogEffects {

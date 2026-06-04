@@ -13,8 +13,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import * as AuthActions from '@core/store/auth/auth.actions';
 import { MenuItem } from 'primeng/api';
-import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/confirm-dialog.actions';
 import { PrimeNgSeverity } from '@core/interfaces/primeng-severity.enums';
+import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/dialog-config.actions';
 
 @Component({
   selector: 'app-header',

@@ -34,11 +34,11 @@ export const routes: Routes = [
   },
 
   //  Admin dashboard
-  // {
-  //   path: 'admin',
-  //   canActivate: [authGuard, roleGuard(['admin'])],
-  //   loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
-  // },
+  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard(['admin'])],
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
 
   //  Driver app
   // {

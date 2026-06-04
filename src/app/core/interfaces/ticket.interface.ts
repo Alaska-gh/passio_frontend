@@ -24,4 +24,6 @@ export interface DailySummary {
   totalRevenue: number;
   totalSeats: number;
   lastTicket: Ticket | null;
+  activeBuses: number;
+  busesOnTrip: number;
 }

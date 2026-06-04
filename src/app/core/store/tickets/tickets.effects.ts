@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom, exhaustMap } from 'rxjs/operators';
 import { TicketService } from '../../services/ticket.service';
-import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS, LOAD_TODAY_SUMMARY, LOAD_TODAY_SUMMARY_FAILURE, LOAD_TODAY_SUMMARY_SUCCESS } from './tickets.action';
+import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS, LOAD_RECENT_TICKET, LOAD_RECENT_TICKET_FAILURE, LOAD_RECENT_TICKET_SUCCESS, LOAD_TODAY_SUMMARY, LOAD_TODAY_SUMMARY_FAILURE, LOAD_TODAY_SUMMARY_SUCCESS } from './tickets.action';
 import { selectCurrentUser } from '../auth/auth.selectors';
 import { Store } from '@ngrx/store';
 import { TripService } from '@core/services/trip.service';
@@ -30,6 +30,18 @@ export class TicketEffects {
           catchError((error) =>
             of(ISSUE_TICKET_FAILURE({ error: error.message }))
           )
+        )
+      )
+    )
+  );
+
+  loadRecentTickets$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(LOAD_RECENT_TICKET),
+      switchMap(() =>
+        this.ticketService.getRecentTickets().pipe(
+          map(tickets => LOAD_RECENT_TICKET_SUCCESS({ tickets })),
+          catchError(err => of(LOAD_RECENT_TICKET_FAILURE({ error: err.message })))
         )
       )
     )

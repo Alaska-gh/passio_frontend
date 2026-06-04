@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { OPEN_CONFIRM_DIALOG, CLOSE_CONFIRM_DIALOG } from './confirm-dialog.actions';
+import { CLOSE_CONFIRM_DIALOG, OPEN_CONFIRM_DIALOG } from './dialog-config.actions';
 
 export interface ConfirmDialogState {
   isOpen: boolean;

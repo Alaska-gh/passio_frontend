@@ -34,6 +34,19 @@ export const LOAD_TODAY_SUMMARY_FAILURE = createAction(
   '[Tickets] Load Today Summary Failue',
    props<{ error: string }>()
 )
+export const LOAD_RECENT_TICKET = createAction(
+  '[Tickets] Load Today Summary',
+)
+
+export const LOAD_RECENT_TICKET_SUCCESS = createAction(
+  '[Tickets] Load Today Sammary Success',
+   props<{ tickets: Ticket[] }>()
+)
+
+export const LOAD_RECENT_TICKET_FAILURE = createAction(
+  '[Tickets] Load Today Summary Failue',
+   props<{ error: string }>()
+)
 
 export const RESET_TICKET = createAction(
   '[Tickets] Rset Ticket',

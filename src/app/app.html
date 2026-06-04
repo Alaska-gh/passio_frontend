@@ -17,7 +17,7 @@
       'ml-[265px]':  (sidenavOpened || isPeeking) && (vm.userRole === 'admin' || vm.userRole === 'cashier'),
       'ml-4': !sidenavOpened && !isPeeking && (vm.userRole === 'admin' || vm.userRole === 'cashier')
     }">
-      @if (!vm.isAuthenticated && !(vm.userRole === 'admin' || vm.userRole === 'cashier')) {
+      @if (!(vm.userRole === 'admin' || vm.userRole === 'cashier')) {
         <app-header class="sticky top-0 z-30 w-full"></app-header>
       }
 
