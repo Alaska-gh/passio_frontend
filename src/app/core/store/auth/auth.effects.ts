@@ -30,7 +30,7 @@ export class AuthEffects {
     ).pipe(
       switchMap((firebaseUser) => {
         if (!firebaseUser) {
-          return of(AuthActions.USER_UNAUTHENTICATED);
+          return of(AuthActions.USER_UNAUTHENTICATED());
         }
         return this.loadProfile(firebaseUser.uid).pipe(
           map((user) =>
@@ -55,7 +55,7 @@ export class AuthEffects {
               severity: ToastSeverity.SUCCESS,
             })
            )
-            return AuthActions.SEND_OTP_SUCCESS;
+            return AuthActions.SEND_OTP_SUCCESS();
           }),
           catchError((err) =>
             of(AuthActions.SEND_OTP_FAILURE({ error: this.friendlyAuthError(err) })),
@@ -171,7 +171,7 @@ export class AuthEffects {
   signOutSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.SEND_OTP_SUCCESS),
+        ofType(AuthActions.SIGNOUT_SUCCESS),
         tap(() => this.router.navigate(['/auth/login'])),
       ),
     { dispatch: false },
@@ -187,6 +187,15 @@ export class AuthEffects {
       }),
     );
   }
+
+  navigateToVerify$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.SEND_OTP_SUCCESS),
+        tap(() => this.router.navigate(['/auth/verify']))
+      ),
+    { dispatch: false }
+  );
 
   private friendlyAuthError(err: any): string {
     const code = err?.code ?? '';

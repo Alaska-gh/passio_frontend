@@ -13,6 +13,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import * as AuthActions from '@core/store/auth/auth.actions';
 import { MenuItem } from 'primeng/api';
+import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/confirm-dialog.actions';
+import { PrimeNgSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Component({
   selector: 'app-header',
@@ -76,6 +78,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   signOut() {
-    this.store.dispatch(AuthActions.SIGNOUT());
+    this.store.dispatch(OPEN_CONFIRM_DIALOG({
+      header: 'Confirm Logout',
+      message:'Are you sure you want to log out?',
+      acceptLabel: 'Signout',
+      acceptAction: AuthActions.SIGNOUT(),
+      confirmType: PrimeNgSeverity.CONTRAST
+    }));
   }
 }

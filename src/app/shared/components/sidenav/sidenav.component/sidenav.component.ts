@@ -10,6 +10,8 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { DividerModule } from 'primeng/divider';
 import * as AuthActions from '@core/store/auth/auth.actions';
 import { filter, of, Subject, takeUntil, tap } from 'rxjs';
+import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/confirm-dialog.actions';
+import { PrimeNgSeverity } from '@core/interfaces/primeng-severity.enums';
 
 @Component({
   selector: 'app-sidenav',
@@ -68,9 +70,17 @@ export class SidenavComponent {
     }
   }
 
-  logout() {
-    this.store.dispatch(AuthActions.SIGNOUT());
-  }
+    logout() {
+      console.log('logged out');
+      
+      this.store.dispatch(OPEN_CONFIRM_DIALOG({
+        header: 'Confirm Logout',
+        message:'Are you sure you want to log out?',
+        acceptLabel: 'Signout',
+        acceptAction: AuthActions.SIGNOUT(),
+        confirmType: PrimeNgSeverity.DANGER
+      }));
+    }
 
   isActive(route: string): boolean {
     return this.router.url === route;

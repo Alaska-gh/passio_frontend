@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Component, signal, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from '@core/header/header.component/header.component';
 import {  selectIsAuthenticated, selectUserRole } from '@core/store/auth/auth.selectors';
@@ -11,11 +11,22 @@ import { SidenavComponent } from '@shared/components/sidenav/sidenav.component/s
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { CommonModule } from '@angular/common';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ToastModule, SidenavComponent, ButtonModule, CommonModule,  TooltipModule],
+  imports: [
+    RouterOutlet, 
+    HeaderComponent, 
+    ToastModule, 
+    SidenavComponent,
+    ButtonModule, 
+    CommonModule, 
+    TooltipModule,
+    ConfirmDialogModule
+    ],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
