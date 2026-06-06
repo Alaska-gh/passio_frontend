@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { User } from '@core/interfaces';
@@ -23,6 +23,7 @@ import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/dialog-config.actions';
 export class SidenavComponent {
   @Input() sidenavOpened!: boolean;
   @Input() isPeeking!: boolean;
+  @Output() closeNav = new EventEmitter<void>();
 
   navItems: MenuItem[] = [];
   user!: User;
@@ -35,9 +36,7 @@ export class SidenavComponent {
     this.store.select(selectCurrentUser).pipe(
       filter((user): user is User => user !== null),
       takeUntil(this.destroy$),
-      tap((user: User) => {
-        console.log(user);
-        
+      tap((user: User) => {        
         this.user = user;
         this.setMenuItems()
       })
@@ -51,22 +50,22 @@ export class SidenavComponent {
         { 
            label: 'Dashboard', 
            icon: 'fas fa-home', 
-           routerLink: 'admin/dashboard'
+           routerLink: '/admin/dashboard'
           },
         { 
           label: 'Bus management', 
           icon: 'fas fa-car',
-          routerLink: 'admin/buses'
+          routerLink: '/admin/buses'
          },
         { 
           label: 'Tickets', 
           icon: 'fas fa-ticket', 
-          routerLink: 'admin/tickets'
+          routerLink: '/admin/tickets'
         },
         { 
           label: 'Routes', 
           icon: 'fas fa-map',
-          routerLink: 'admin/routes'
+          routerLink: '/admin/routes'
         },
       ];
     }
@@ -90,6 +89,25 @@ export class SidenavComponent {
         },
       ];
     }
+    if (this.user.role === 'driver') {
+      this.navItems = [
+        {
+          label: 'Home',
+          icon: 'fas fa-home',
+          routerLink: '/driver/home',
+        },
+        {
+          label: 'Queue',
+          icon: 'fas fa-bus',
+          routerLink: '/driver/queue',
+        },
+        {
+          label: 'History',
+          icon: 'fas fa-history',
+          routerLink: '/driver/history'
+        },
+      ];
+    }
   }
 
     logout() {
@@ -107,6 +125,10 @@ export class SidenavComponent {
   isActive(route: string): boolean {
     return this.router.url === route;
   }
+
+onNavItemClick(): void {
+  this.closeNav.emit();
+}
 
   ngOnDestroy(): void {
     this.destroy$.next();

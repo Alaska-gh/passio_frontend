@@ -26,7 +26,7 @@ export const LOAD_TODAY_SUMMARY= createAction(
 )
 
 export const LOAD_TODAY_SUMMARY_SUCCESS = createAction(
-  '[Tickets] Load Today Sammary Success',
+  '[Tickets] Load Today Summary Success',
    props<{ summary: DailySummary }>()
 )
 
@@ -34,17 +34,25 @@ export const LOAD_TODAY_SUMMARY_FAILURE = createAction(
   '[Tickets] Load Today Summary Failue',
    props<{ error: string }>()
 )
+export const LOAD_ADMIN_SUMMARY = createAction('[Tickets] Load Admin Summary');
+
+export const LOAD_ADMIN_SUMMARY_SUCCESS = createAction('[Tickets] Load Admin Summary Success',
+  props<{ summary: DailySummary }>());
+  
+export const LOAD_ADMIN_SUMMARY_FAILURE = createAction('[Tickets] Load Admin Summary Failure',
+  props<{ error: string }>());
+
 export const LOAD_RECENT_TICKET = createAction(
-  '[Tickets] Load Today Summary',
+  '[Tickets] Load Recent Ticket',
 )
 
 export const LOAD_RECENT_TICKET_SUCCESS = createAction(
-  '[Tickets] Load Today Sammary Success',
+  '[Tickets] Load Recent Ticket Success',
    props<{ tickets: Ticket[] }>()
 )
 
 export const LOAD_RECENT_TICKET_FAILURE = createAction(
-  '[Tickets] Load Today Summary Failue',
+  '[Tickets] Load Recent Ticket Failure',
    props<{ error: string }>()
 )
 

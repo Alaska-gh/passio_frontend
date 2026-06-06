@@ -1,5 +1,5 @@
 import { isDevMode } from '@angular/core';
-import { ActionReducerMap, MetaReducer } from '@ngrx/store';
+import { ActionReducer, ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { authReducer, AuthState } from './auth/auth.reducers';
 import { busesReducer, BusState } from './buses/buses.reducers';
 import { activeRoutesReducer, activeRouteState } from './routes/route.reducer';
@@ -24,5 +24,6 @@ export const reducers: ActionReducerMap<AppState> = {
   routes: activeRoutesReducer,
   appConfig: appConfigReducer
 };
+
 
 export const metaReducers: MetaReducer<AppState>[] = isDevMode() ? [] : [];

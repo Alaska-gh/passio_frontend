@@ -6,19 +6,21 @@
         <h1 class="text-lg font-semibold text-gray-800">Bus management</h1>
         <p class="text-sm text-gray-400">Queue order, status and trip history</p>
       </div>
-      <p-button label="Add bus" icon="fas fa-plus" (onClick)="openAddBusModal()" />
+      <p-button label="Add New Bus" icon="fas fa-plus" 
+        styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700!"
+        (onClick)="openAddBusModal()" />
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       <div class="px-5 py-3.5 border-b border-gray-100">
         <span class="text-sm font-semibold text-gray-700">All buses</span>
       </div>
-      <p-table [value]="(buses$ | async) ?? []" [loading]="!!(busesLoading$ | async)"
-        sortField="queueOrder" [sortOrder]="1">
+      <p-table [value]="(buses$ | async) ?? []" [loading]="!!(busesLoading$ | async)">
         <ng-template pTemplate="header">
           <tr>
             <th pSortableColumn="queueOrder">Queue <p-sortIcon field="queueOrder" /></th>
             <th>Plate number</th>
+            <th>Driver</th>
             <th>Type</th>
             <th>Capacity</th>
             <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
@@ -29,14 +31,21 @@
           <tr>
             <td>
               @if (bus.queueOrder != null) {
-                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-sm font-semibold text-gray-700">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-100 text-sm font-semibold text-orange-700">
                   {{ bus.queueOrder }}
                 </span>
               } @else {
-                <span class="text-gray-300 text-sm">—</span>
+                <span class="text-orange-300 text-sm"><i class="fas fa-check"></i></span>
               }
             </td>
             <td><code>{{ bus.plateNumber }}</code></td>
+            <td class="text-gray-500">
+                @if (bus.driverName) {
+                    {{ bus.driverName }}
+                } @else {
+                    <span class="text-gray-300 text-sm">Unassigned</span>
+                }
+                </td>
             <td class="text-gray-500 capitalize">{{ bus.busType }}</td>
             <td class="text-gray-500">{{ bus.capacity }} seats</td>
             <td><p-tag [value]="bus.status" [severity]="getStatusSeverity(bus.status)" /></td>
@@ -48,7 +57,7 @@
                 </button>
                 <button pTooltip="Trip history" (click)="viewHistory(bus)"
                   class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
-                  <i class="fas fa-history text-xs"></i>
+                  <i class="fas fa-eye text-xs"></i>
                 </button>
                 @if (bus.status === 'active') {
                   <button pTooltip="Set inactive" (click)="setBusInactive(bus)"
@@ -56,7 +65,7 @@
                     <i class="fas fa-pause text-xs"></i>
                   </button>
                 }
-                @if (bus.status === 'inactive') {
+                @if (bus.status === 'inactive' || bus.status === 'on-trip') {
                   <button pTooltip="Set active" (click)="setBusActive(bus)"
                     class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors">
                     <i class="fas fa-play text-xs"></i>

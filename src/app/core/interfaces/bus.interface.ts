@@ -7,6 +7,7 @@ export interface Bus {
   status: BusStatus;
   model?: string;
   assignedDriverId?: string;
+  assignedDriverName: string | null;
   createdAt: Date;
   busType: string;
   queueOrder: number | null;

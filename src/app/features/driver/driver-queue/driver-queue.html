@@ -1,0 +1,62 @@
+<div class="p-4 ml-4 md:ml-0">
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between">
+      <span class="text-sm font-semibold text-gray-700">Bus queue</span>
+      <span class="text-xs text-gray-400">
+        {{ (queuedBuses$ | async)?.length ?? 0 }} active
+      </span>
+    </div>
+
+    @if (queuedBuses$ | async; as buses) {
+      @if (buses.length === 0) {
+        <p class="text-sm text-gray-400 text-center py-8">No buses in queue</p>
+      } @else {
+        <ul class="divide-y divide-gray-50">
+          @for (bus of buses; track bus.id; let i = $index) {
+            <li class="px-4 py-3.5 flex items-center gap-3"
+              [class.bg-green-50]="bus.id === (assignedBus$ | async)?.id">
+              <span
+                class="inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0"
+                [class.bg-green-600]="i === 0"
+                [class.text-white]="i === 0"
+                [class.bg-gray-100]="i !== 0"
+                [class.text-gray-600]="i !== 0">
+                @if (bus.queueOrder) {
+                    {{ bus.queueOrder }} 
+                }@else {
+                    <i class="fas fa-check text-orange-700"></i>
+                }
+              </span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  {{ bus.plateNumber }}
+                  @if (bus.id === (assignedBus$ | async)?.id) {
+                    <span class="text-xs text-green-600 font-medium">You</span>
+                  }
+                  @if (i === 0) {
+                    <span class="text-xs text-orange-500 font-medium">Loading</span>
+                  }
+                </p>
+                <p class="text-xs text-gray-400 capitalize mt-0.5">
+                  {{ bus.busType }} · {{ bus.capacity }} seats
+                </p>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <ul class="divide-y divide-gray-50">
+        @for (i of [1,2,3]; track i) {
+          <li class="px-4 py-3 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gray-100 animate-pulse shrink-0"></div>
+            <div class="flex-1 space-y-1.5">
+              <div class="h-3 bg-gray-100 rounded animate-pulse w-3/4"></div>
+              <div class="h-2.5 bg-gray-100 rounded animate-pulse w-1/2"></div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

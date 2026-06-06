@@ -41,11 +41,11 @@ export const routes: Routes = [
   },
 
   //  Driver app
-  // {
-  //   path: 'driver',
-  //   canActivate: [authGuard, roleGuard(['driver'])],
-  //   loadChildren: () => import('./features/driver/driver.routes').then((m) => m.DRIVER_ROUTES),
-  // },
+  {
+    path: 'driver',
+    canActivate: [authGuard, roleGuard(['driver'])],
+    loadChildren: () => import('./features/driver/driver.routes').then((m) => m.DRIVER_ROUTES),
+  },
 
   //  Conductor scanner
   // {

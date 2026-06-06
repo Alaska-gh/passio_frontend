@@ -74,7 +74,7 @@ export class BusManagement {
 
   viewHistory(bus: Bus): void {
     this.selectedBus = bus;
-    this.showHistory = true;
+    this.showHistory = true;    
     this.store.dispatch(LOAD_BUS_TRIP_HISTORY({ busId: bus.id }));
   }
 

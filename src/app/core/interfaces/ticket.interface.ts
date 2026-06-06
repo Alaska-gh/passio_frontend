@@ -3,6 +3,7 @@ export type TicketStatus = 'active' | 'used' | 'expired' | 'refunded';
 export interface Ticket {
   status: TicketStatus;
   ticketNumber: string;
+  busPlateNumber: string;
   tripId: string;
   route: string;
   origin: string;

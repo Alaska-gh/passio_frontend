@@ -6,7 +6,7 @@ import { selectRecentTickets, selectRecentTicketsLoading, selectSummary } from '
 import { Store } from '@ngrx/store';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { LOAD_BUS_TRIP_HISTORY, LOAD_BUSES, SET_BUS_ACTIVE, SET_BUS_INACTIVE } from '@core/store/buses/buses.actions';
-import { LOAD_RECENT_TICKET, LOAD_TODAY_SUMMARY } from '@core/store/tickets/tickets.action';
+import { LOAD_ADMIN_SUMMARY, LOAD_RECENT_TICKET, LOAD_TODAY_SUMMARY } from '@core/store/tickets/tickets.action';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
@@ -23,17 +23,16 @@ import { StatusSeverity } from '@core/interfaces/status-severity';
   styleUrl: './admin-dashboard.css',
 })
 export class AdminDashboard {
-  todaySummary$ = this.store.select(selectSummary);
+  todaySummary$: Observable<DailySummary | null> = this.store.select(selectSummary);
   recentTickets$ = this.store.select(selectRecentTickets);
   recentTicketsLoading$ = this.store.select(selectRecentTicketsLoading);
+  today = new Date().toISOString().split('T')[0];
 
- constructor(private store: Store) {}
+ constructor(private store: Store) { }
 
   ngOnInit(): void {
-    this.store.dispatch(LOAD_TODAY_SUMMARY());
+    this.store.dispatch(LOAD_ADMIN_SUMMARY());
     this.store.dispatch(LOAD_RECENT_TICKET());
-
-    this.todaySummary$.subscribe((summary) => console.log(summary))
-    this.recentTickets$.subscribe((tickets) => console.log(tickets))
   }
+
 }

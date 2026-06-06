@@ -65,6 +65,46 @@ export class TicketService {
   );
 }
 
+getAdminDailySummary(): Observable<DailySummary> {
+  return defer(() =>
+    runInInjectionContext(this.injector, () => {
+      const today = new Date().toISOString().split('T')[0];
+      console.log(today);
+      
+      const ticketsRef = collection(this.firestore, 'tickets');
+      const ticketsQuery = query(
+        ticketsRef,
+        where('travelDate', '==', today) 
+      );
+
+      const busesRef = collection(this.firestore, 'busses');
+      const busesQuery = query(busesRef, where('status', 'in', ['active', 'on-trip']));
+
+      return forkJoin({
+        ticketsSnap: from(getDocs(ticketsQuery)),
+        busesSnap: from(getDocs(busesQuery)),
+      }).pipe(
+        map(({ ticketsSnap, busesSnap }) => {
+          const tickets = ticketsSnap.docs.map(d => this.mapTicket(d));
+          const buses = busesSnap.docs.map(d => d.data() as Bus);
+
+          return {
+            totalTickets: tickets.length,
+            totalRevenue: tickets.reduce((sum, t) => sum + t.totalAmount, 0),
+            totalSeats: tickets.reduce((sum, t) => sum + t.numberOfSeats, 0),
+            lastTicket: tickets.length > 0
+              ? tickets.reduce((latest, t) =>
+                  new Date(t.issuedAt) > new Date(latest.issuedAt) ? t : latest)
+              : null,
+            activeBuses: buses.filter(b => b.status === 'active').length,
+            busesOnTrip: buses.filter(b => b.status === 'on-trip').length,
+          } as DailySummary;
+        })
+      );
+    })
+  );
+}
+
 getRecentTickets(limitCount = 5): Observable<Ticket[]> {
   return defer(() =>
     runInInjectionContext(this.injector, () => {

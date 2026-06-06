@@ -10,13 +10,16 @@ import { ISSUE_TICKET, RESET_TICKET } from '@core/store/tickets/tickets.action';
 import { selectIssuedTicket, selectTicketError, selectTicketLoading } from '@core/store/tickets/tickets.selectors';
 import { selectCurrentTrip, selectTripLoading } from '@core/store/trips/trips.selectors';
 import { Store } from '@ngrx/store';
-import { debounceTime, Observable, Subject, take, takeUntil } from 'rxjs';
+import { debounceTime, map, Observable, Subject, take, takeUntil } from 'rxjs';
 import { Button } from "primeng/button";
 import { LOAD_CURRENT_TRIP, RESET_TRIP } from '@core/store/trips/trips.actions';
+import { selectAllBuses, selectQueuedBuses } from '@core/store/buses/buses.selector';
+import { LOAD_BUSES } from '@core/store/buses/buses.actions';
+import { Tag } from "primeng/tag";
 
 @Component({
   selector: 'app-issue-ticket.component',
-  imports: [CommonModule, FormsModule, Button],
+  imports: [CommonModule, FormsModule, Button, Tag],
   standalone: true,
   templateUrl: './issue-ticket.component.html',
   styleUrl: './issue-ticket.component.css',
@@ -36,6 +39,12 @@ export class IssueTicketComponent implements OnInit{
   loading$!: Observable<boolean>;
   tripLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
+  queuedBuses$ = this.store.select(selectQueuedBuses);
+  allBuses$ = this.store.select(selectAllBuses);
+  onTripCount$ = this.allBuses$.pipe(
+    map(buses => buses.filter(bus => bus.status === 'on-trip').length)
+  );
+  
 
   private cashierUid = '';
   private destroy$ = new Subject<void>();
@@ -51,11 +60,13 @@ export class IssueTicketComponent implements OnInit{
     this.loading$ = this.store.select(selectTicketLoading);
     this.tripLoading$ = this.store.select(selectTripLoading);
     this.error$ = this.store.select(selectTicketError);
+    
   }
 
   ngOnInit() {
     this.store.dispatch(GET_ACTIVE_ROUTES())
     this.store.dispatch(RESET_TICKET());
+    this.store.dispatch(LOAD_BUSES());
     this.store.select(selectCurrentUser).pipe(
       takeUntil(this.destroy$)).subscribe(
         user => { if (user) this.cashierUid = user.uid; });
@@ -129,6 +140,7 @@ export class IssueTicketComponent implements OnInit{
     const ticket: Ticket = {
       ticketNumber: this.ticketService.generateTicketNumber(),
       tripId: trip.id!,
+      busPlateNumber: trip.busPlateNumber,
       route: `${this.selectedRoute.origin} → ${this.selectedRoute.destination}`,
       origin: this.selectedRoute.origin,
       destination: this.selectedRoute.destination,

@@ -13,6 +13,8 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, delay, from, of } from 'rxjs';
 import { BusRoute, RouteStop } from '@core/interfaces/route.interface';
+import { Bus } from '@core/interfaces';
+import { getTransportFare } from '@core/interfaces/fare-price-helper';
 
 @Injectable({ providedIn: 'root' })
 export class RouteService {
@@ -58,10 +60,11 @@ export class RouteService {
   }
 
   /** Create a new route — admin only */
-  createRoute(route: Omit<BusRoute, 'id'>): Observable<void> {
+  createRoute(route: Omit<BusRoute, 'id'>, bus: Bus): Observable<void> {
     return from(
       addDoc(collection(this.firestore, 'routes'), {
         ...route,
+        fareGHS: bus.busType === 'normal' ? 50 : 56,
         createdAt: serverTimestamp(),
       }).then(() => undefined),
     );

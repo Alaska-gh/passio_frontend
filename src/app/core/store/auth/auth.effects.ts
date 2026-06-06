@@ -82,11 +82,13 @@ export class AuthEffects {
             return AuthActions.VERIFY_OTP_SUCCESS({ user });
           }),
           catchError((err) => {
-            SHOW_TOAST({
+            this.store.dispatch(
+              SHOW_TOAST({
               title: 'Failed To Verify OTP',
               message: err,
               severity: ToastSeverity.ERROR,
-            });
+            })
+            )
             return of(AuthActions.VERIFY_OTP_FAILURE({ error: this.friendlyAuthError(err) }));
           }),
         ),

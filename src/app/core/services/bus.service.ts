@@ -1,7 +1,7 @@
 import { inject, Injectable, Injector, runInInjectionContext } from "@angular/core";
 import { addDoc, collection, doc, Firestore, getDocs, limit, orderBy, query, updateDoc, where } from "@angular/fire/firestore";
-import { Bus, Trip } from "@core/interfaces";
-import { defer, from, map, Observable, switchMap } from "rxjs";
+import { Bus, Trip, User } from "@core/interfaces";
+import { catchError, defer, from, map, Observable, of, switchMap, tap } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
 export class BusService {
@@ -48,7 +48,10 @@ export class BusService {
             };
 
             return from(addDoc(busesRef, newBus)).pipe(
-              map(ref => ({ id: ref.id, ...newBus } as Bus))
+              map(ref => ({ id: ref.id, ...newBus } as Bus)),
+              catchError((err) => {
+                return of(err)
+              })
             );
           })
         );
@@ -107,20 +110,44 @@ export class BusService {
 
   getBusTripHistory(busId: string): Observable<Trip[]> {
     return defer(() =>
-      runInInjectionContext(this.injector, () => {
+      runInInjectionContext(this.injector, () => {        
         const tripsRef = collection(this.firestore, 'trips');
         const q = query(
           tripsRef,
           where('busId', '==', busId),
           orderBy('date', 'desc'),
           limit(20)
-        );
+        );        
         return from(getDocs(q)).pipe(
           map(snapshot =>
             snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Trip))
-          )
+          ),
+          catchError(err => {
+            return of(err);
+          })
         );
       })
     );
   }
+
+  getDrivers(): Observable<User[]> {
+  return defer(() =>
+    runInInjectionContext(this.injector, () => {
+      const usersRef = collection(this.firestore, 'users');
+      const q = query(usersRef, where('role', '==', 'driver'));
+      return from(getDocs(q)).pipe(
+        map(snapshot =>
+          snapshot.docs.map(d => {
+            const data = d.data() as User
+
+            return {
+              id: d.id,
+              ...data
+            }
+          })
+        )
+      );
+    })
+  );
+}
 }

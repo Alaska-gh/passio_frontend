@@ -4,6 +4,9 @@
       <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
       <p class="text-sm text-gray-400">Today's overview</p>
     </div>
+    <div>
+        <p>{{today}}</p>
+    </div>
   </div>
 
   @if (todaySummary$ | async; as summary) {
@@ -34,12 +37,12 @@
   <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
     <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-700">Recent tickets</span>
-      <a routerLink="/admin/tickets" class="text-xs text-gray-400 hover:text-gray-700">View all</a>
+      <a routerLink="/admin/tickets" class="text-xs text-orange-400 hover:text-orange-700 cursor-pointer">View all</a>
     </div>
     <p-table [value]="(recentTickets$ | async) ?? []" [loading]="!!(recentTicketsLoading$ | async)" [rows]="5">
       <ng-template pTemplate="header">
         <tr>
-          <th>Ticket #</th><th>Passenger</th><th>Route</th><th>Seats</th><th>Amount</th><th>Issued</th>
+          <th>Ticket #</th><th>Passenger</th><th>Route</th><th>Bus</th><th>Seats</th><th>Amount</th><th>Issued</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-ticket>
@@ -47,6 +50,7 @@
           <td><code>{{ ticket.ticketNumber }}</code></td>
           <td>{{ ticket.passengerName }}</td>
           <td>{{ ticket.route }}</td>
+          <td>{{ ticket.busPlateNumber }}</td>
           <td>{{ ticket.numberOfSeats }}</td>
           <td>GHS {{ ticket.totalAmount }}</td>
           <td>{{ ticket.issuedAt | date:'shortTime' }}</td>

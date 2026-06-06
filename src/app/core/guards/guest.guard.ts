@@ -16,7 +16,7 @@ export const guestGuard: CanActivateFn = () => {
   const destinations: Record<UserRole, string> = {
     customer: '/customer/routes',
     admin: '/admin/dashboard',
-    driver: '/driver/schedule',
+    driver: '/driver/home',
     conductor: '/conductor/scanner',
     cashier: '/cashier/dashboard'
   };

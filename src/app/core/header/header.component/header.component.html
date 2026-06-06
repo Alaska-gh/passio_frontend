@@ -1,4 +1,4 @@
-<div class="bg-orange-600 text-white text-sm py-2 px-6 flex justify-between items-center">
+<div class="hidden bg-orange-600 text-white text-sm py-2 px-6 md:flex justify-between items-center">
   <div class="flex gap-4">
     <span><i class="fab fa-instagram"></i></span>
     <span><i class="fab fa-x-twitter"></i></span>
@@ -13,7 +13,7 @@
 </div>
 
 <!-- Navbar -->
-<div class="bg-white shadow-md px-8 py-2 flex justify-between items-center">
+<div class="bg-white shadow-md px-8 py-1 flex justify-between items-center">
   <h1 class="text-xl font-bold text-gray-800 cursor-pointer">Passio<span class="text-orange-600 text-4xl">.</span></h1>
   <nav class="hidden md:flex gap-8 text-gray-600 font-medium">
     <a routerLink="/customer/home" routerLinkActive="text-orange-600">
@@ -29,7 +29,7 @@
 
   <div>
     @if (isAuthenticated) {
-    <p-avatar icon="fas fa-user" style="background-color: #dee9fc; color: #1a2551" shape="circle" 
+    <p-avatar icon="fas fa-user" style="background-color: #dee9fc; color: #1a2551" shape="square" 
     (click)="menu.toggle($event)" class="justify-end"/>
 
     <p-menu #menu [model]="items" [popup]="true">

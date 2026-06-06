@@ -153,7 +153,7 @@ export class AuthService {
     const routes: Record<UserRole, string> = {
       customer: '/customer/home',
       admin: '/admin',
-      driver: '/driver/schedule',
+      driver: '/driver/home',
       conductor: '/conductor/scanner',
       cashier: '/cashier',
     };

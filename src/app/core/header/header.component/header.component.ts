@@ -83,7 +83,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       message:'Are you sure you want to log out?',
       acceptLabel: 'Signout',
       acceptAction: AuthActions.SIGNOUT(),
-      confirmType: PrimeNgSeverity.CONTRAST
+      confirmType: PrimeNgSeverity.DANGER
+      
     }));
   }
 }
