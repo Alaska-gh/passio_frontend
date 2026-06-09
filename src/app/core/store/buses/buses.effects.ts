@@ -26,11 +26,16 @@ export class BusesEffects {
   addBus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ADD_BUS),
-      switchMap(({ bus }) =>
-        this.busService.addBus(bus).pipe(
+      switchMap(({ bus }) => {
+         console.log('[Effects] Calling service with:', bus)
+         return this.busService.addBus(bus).pipe(
+          tap((bus) => console.log(bus)
+          ),
           map(newBus => ADD_BUS_SUCCESS({ bus: newBus })),
-          catchError(err => of(ADD_BUS_FAILURE({ error: err.message })))
+          catchError(err => {
+            return of(ADD_BUS_FAILURE({ error: err.message }))})
         )
+      }
       )
     )
   );

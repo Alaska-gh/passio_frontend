@@ -8,3 +8,5 @@ export const selectTicketLoading = createSelector(selectTicketState, s => s.load
 export const selectTicketError = createSelector(selectTicketState, s => s.error);
 export const selectSummary = createSelector(selectTicketState, s => s.summary);
 export const selectSummaryLoading = createSelector(selectTicketState, s => s.summaryLoading);
+export const selectRecentTickets = createSelector(selectTicketState, s => s.tickets);
+export const selectRecentTicketsLoading = createSelector(selectTicketState, s => s.ticketsLoading);

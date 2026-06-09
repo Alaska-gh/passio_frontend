@@ -23,16 +23,27 @@ export const busesReducer = createReducer(
 
   on(LOAD_BUSES, (state) => ({ ...state, loading: true, error: null })),
 
-  on(LOAD_BUSES_SUCCESS, (state, { buses }) => ({ ...state, loading: false, buses })),
+  on(LOAD_BUSES_SUCCESS, (state, { buses }) => (
+    { ...state, loading: false, buses }
+  )),
 
-  on(LOAD_BUSES_FAILURE, (state, { error }) => ({ ...state, loading: false, error })),
+on(LOAD_BUSES_FAILURE, (state, { error }) => ({ ...state, loading: false, error })),
 
-  on(ADD_BUS, (state) => ({ ...state, loading: true })),
+on(ADD_BUS, (state) => ({ ...state, loading: true })),
 
-  on(ADD_BUS_SUCCESS, (state, { bus }) => ({
-    ...state, loading: false,
-    buses: [...state.buses, bus].sort((a, b) => (a.queueOrder ?? 0) - (b.queueOrder ?? 0))
-  })),
+on(ADD_BUS_SUCCESS, (state, { bus }) => {
+  const updatedBuses = [...state.buses, bus];
+
+  const sorted = [...updatedBuses].sort(
+    (a, b) => (a.queueOrder ?? 0) - (b.queueOrder ?? 0)
+  );
+
+  return {
+    ...state,
+    loading: false,
+    buses: sorted,
+  };
+}),
 
   on(ADD_BUS_FAILURE, (state, { error }) => ({ ...state, loading: false, error })),
 

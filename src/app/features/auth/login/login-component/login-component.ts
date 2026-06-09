@@ -38,14 +38,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap((err) => (this.error = err)),
       ).subscribe();
-
-    this.store.select(selectOtpSent).pipe(
-      takeUntil(this.destroy$)).subscribe(
-        (sent) => {
-        if (sent) {
-          this.router.navigate(['/auth/verify']);
-        }
-      });
   }
 
   get phoneControl(): AbstractControl {

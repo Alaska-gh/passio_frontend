@@ -1,0 +1,58 @@
+<form [formGroup]="busForm" class="flex flex-col gap-4 p-2">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Plate number</label>
+          <input pInputText formControlName="plateNumber" placeholder="GR-1234-24"
+            class="w-full border-gray-300 focus:border-gray-300 focus:ring-0 focus:outline-none shadow-none" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Bus type</label>
+          <p-select formControlName="busType" [options]="busTypes"
+            optionLabel="label" optionValue="value" styleClass="w-full" />
+        </div>
+      </div>
+
+     <div class="grid grid-cols-2 gap-4">
+         <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Capacity</label>
+        <input pInputText type="number" formControlName="capacity" placeholder="14"
+          class="w-full border-gray-300 focus:border-gray-300 focus:ring-0 focus:outline-none shadow-none" />
+      </div>
+
+      <!-- Driver dropdown -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Assigned driver <span class="text-gray-300 normal-case font-normal">(optional)</span>
+        </label>
+        <p-select
+          formControlName="driverId"
+          [options]="drivers"
+          optionLabel="displayName"
+          optionValue="id"
+          placeholder="Select a driver"
+          [filter]="true"
+          filterBy="displayName"
+          [loading]="driversLoading"
+          styleClass="w-full">
+          <ng-template pTemplate="item" let-driver>
+            <div class="flex flex-col">
+              <span class="text-sm">{{ driver.displayName }}</span>
+              <span class="text-xs text-gray-400">{{ driver.phone }}</span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="selectedItem" let-driver>
+            {{ driver?.displayName }}
+          </ng-template>
+        </p-select>
+      </div>
+     </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+        <p-button label="Cancel" severity="secondary" (onClick)="cancel()" />
+        <p-button
+          [label]="isEditing ? 'Save Changes' : 'Add New Bus'"
+          (onClick)="save()"
+          [disabled]="busForm.invalid"
+          styleClass="bg-orange-600! text-white! border-none! hover:bg-orange-700!" />
+      </div>
+    </form>

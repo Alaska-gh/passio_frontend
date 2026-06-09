@@ -125,182 +125,214 @@ export class TripService {
   }
 
   getNextBus(currentQueueOrder: number, excludeBusId?: string): Observable<Bus | null> {
-  return defer(() =>
-    runInInjectionContext(this.injector, () => {
-      const busesRef = collection(this.firestore, 'busses');
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const busesRef = collection(this.firestore, 'busses');
 
-      const q = query(
-        busesRef,
-        where('queueOrder', '>', currentQueueOrder),
-        where('status', '==', 'active'),
-        orderBy('queueOrder', 'asc'),
-        limit(1)
-      );
+        const q = query(
+          busesRef,
+          where('queueOrder', '>', currentQueueOrder),
+          where('status', '==', 'active'),
+          orderBy('queueOrder', 'asc'),
+          limit(1)
+        );
 
-      return from(getDocs(q)).pipe(
-        switchMap((snapshot) => {
-          if (!snapshot.empty) {
-            const d = snapshot.docs[0];
-            return of({ id: d.id, ...d.data() } as Bus);
-          }
+        return from(getDocs(q)).pipe(
+          switchMap((snapshot) => {
+            if (!snapshot.empty) {
+              const d = snapshot.docs[0];
+              return of({ id: d.id, ...d.data() } as Bus);
+            }
 
-          // Wrap around — fetch ALL active buses ordered by queueOrder
-          const wrapQuery = query(
-            busesRef,
-            where('status', '==', 'active'),
-            orderBy('queueOrder', 'asc')
-          );
+            // Wrap around — fetch ALL active buses ordered by queueOrder
+            const wrapQuery = query(
+              busesRef,
+              where('status', '==', 'active'),
+              orderBy('queueOrder', 'asc')
+            );
 
-          return from(getDocs(wrapQuery)).pipe(
-            map((wrapSnapshot) => {
-              if (wrapSnapshot.empty) return null;
+            return from(getDocs(wrapQuery)).pipe(
+              map((wrapSnapshot) => {
+                if (wrapSnapshot.empty) return null;
 
-              const candidates = wrapSnapshot.docs
-                .map(d => ({ id: d.id, ...d.data() } as Bus))
-                .filter(b => b.id !== excludeBusId); // exclude the one that just filled
+                const candidates = wrapSnapshot.docs
+                  .map(d => ({ id: d.id, ...d.data() } as Bus))
+                  .filter(b => b.id !== excludeBusId); // exclude the one that just filled
 
-              return candidates.length > 0 ? candidates[0] : null;
-            })
-          );
-        })
-      );
-    })
-  );
-}
+                return candidates.length > 0 ? candidates[0] : null;
+              })
+            );
+          })
+        );
+      })
+    );
+  }
 
-issueSeatAndSaveTicket(
-  ticket: Ticket, tripId: string, busId: string,
-  seatsToBook: number, currentQueueOrder: number, route: string,
-  origin: string, destination: string, date: string,
-  pricePerSeat: number
-): Observable<{ ticketId: string; trip: Trip; rotated: boolean }> {
-  return defer(() =>
-    runInInjectionContext(this.injector, () => {
-      const tripRef = doc(this.firestore, 'trips', tripId);
-      const currentBusRef = doc(this.firestore, 'busses', busId);
-      const ticketsRef = collection(this.firestore, 'tickets');
-      const newTicketRef = doc(ticketsRef);
+  issueSeatAndSaveTicket(
+    ticket: Ticket, tripId: string, busId: string,
+    seatsToBook: number, currentQueueOrder: number, route: string,
+    origin: string, destination: string, date: string,
+    pricePerSeat: number
+  ): Observable<{ ticketId: string; trip: Trip; rotated: boolean }> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const tripRef = doc(this.firestore, 'trips', tripId);
+        const currentBusRef = doc(this.firestore, 'busses', busId);
+        const ticketsRef = collection(this.firestore, 'tickets');
+        const newTicketRef = doc(ticketsRef);
 
-      return from(
-        runTransaction(this.firestore, async (transaction) => {
-          const tripSnap = await transaction.get(tripRef);
-          const rotationSnap = await transaction.get(this.rotationRef);
+        return from(
+          runTransaction(this.firestore, async (transaction) => {
+            const tripSnap = await transaction.get(tripRef);
+            const rotationSnap = await transaction.get(this.rotationRef);
 
-          if (!tripSnap.exists()) throw new Error('Trip not found');
-          if (!rotationSnap.exists()) throw new Error('Rotation config not found');
+            if (!tripSnap.exists()) throw new Error('Trip not found');
+            if (!rotationSnap.exists()) throw new Error('Rotation config not found');
 
-          const trip = tripSnap.data() as Trip;
+            const trip = tripSnap.data() as Trip;
 
-          if (trip.availableSeats < seatsToBook) {
-            throw new Error(`Only ${trip.availableSeats} seats available`);
-          }
+            if (trip.availableSeats < seatsToBook) {
+              throw new Error(`Only ${trip.availableSeats} seats available`);
+            }
 
-          const newBookedSeats = trip.bookedSeats + seatsToBook;
-          const newAvailableSeats = trip.availableSeats - seatsToBook;
-          const isFull = newAvailableSeats === 0;
+            const newBookedSeats = trip.bookedSeats + seatsToBook;
+            const newAvailableSeats = trip.availableSeats - seatsToBook;
+            const isFull = newAvailableSeats === 0;
 
-          transaction.update(tripRef, {
-            bookedSeats: increment(seatsToBook),
-            availableSeats: increment(-seatsToBook),
-            status: isFull ? 'full' : 'open',
-          });
-
-          transaction.set(newTicketRef, { ...ticket });
-
-           if (isFull) {
-            transaction.update(currentBusRef, {
-              status: 'on-trip',
-              queueOrder: null,
-            });
-          }
-
-          return {
-            ticketId: newTicketRef.id,
-            updatedTrip: {
-              ...trip, id: tripId,
-              bookedSeats: newBookedSeats,
-              availableSeats: newAvailableSeats,
+            transaction.update(tripRef, {
+              bookedSeats: increment(seatsToBook),
+              availableSeats: increment(-seatsToBook),
               status: isFull ? 'full' : 'open',
-            } as Trip,
-            isFull,
-          };
-        })
-      ).pipe(
-        switchMap(({ ticketId, updatedTrip, isFull }) => {
-          if (!isFull) return of({ ticketId, trip: updatedTrip, rotated: false });
+            });
 
-          return this.getNextBus(currentQueueOrder, busId).pipe( 
-            switchMap((nextBus) => {
-              if (!nextBus) {
-                  return from(updateDoc(this.rotationRef, { movingBusId: '' })).pipe(
-                    map(() => ({ ticketId, trip: updatedTrip, rotated: false }))
-                  );
-              }
+            transaction.set(newTicketRef, { ...ticket });
 
-              return from(updateDoc(this.rotationRef, { movingBusId: nextBus.id })).pipe(
-                switchMap(() =>
-                  this.createTrip(nextBus, route, origin, destination, date, pricePerSeat)
-                ),
-                map(() => ({ ticketId, trip: updatedTrip, rotated: true })),
-                tap(() => console.log('[Rotated to bus]', nextBus.id))
-              );
-            })
-          );
-        })
-      );
-    })
-  );
-}
+            if (isFull) {
+              transaction.update(currentBusRef, {
+                status: 'on-trip',
+                queueOrder: null,
+              });
+            }
 
-getCurrentTrip(route: string, origin: string, destination: string,
-  date: string, pricePerSeat: number): Observable<Trip | null> {
-  return this.getMovingBus().pipe(
-    switchMap((movingBus) => {
-      if (!movingBus) throw new Error('No active bus available for this route right now');
+            return {
+              ticketId: newTicketRef.id,
+              updatedTrip: {
+                ...trip, id: tripId,
+                bookedSeats: newBookedSeats,
+                availableSeats: newAvailableSeats,
+                status: isFull ? 'full' : 'open',
+              } as Trip,
+              isFull,
+            };
+          })
+        ).pipe(
+          switchMap(({ ticketId, updatedTrip, isFull }) => {
+            if (!isFull) return of({ ticketId, trip: updatedTrip, rotated: false });
 
-      return this.getOpenTrip(movingBus.id, route, date).pipe(
-        switchMap((existingTrip) => {
-          if (existingTrip) return of(existingTrip);
+            return this.getNextBus(currentQueueOrder, busId).pipe( 
+              switchMap((nextBus) => {
+                if (!nextBus) {
+                    return from(updateDoc(this.rotationRef, { movingBusId: '' })).pipe(
+                      map(() => ({ ticketId, trip: updatedTrip, rotated: false }))
+                    );
+                }
 
-          // No open trip yet for this bus — create one
-          return this.createTrip(movingBus, route, origin, destination, date, pricePerSeat);
-        })
-      );
-    })
-  );
-}
+               return this.reorderQueue().pipe(
+                  switchMap(() =>
+                    from(updateDoc(this.rotationRef, { movingBusId: nextBus.id }))
+                  ),
+                  switchMap(() =>
+                    this.createTrip(nextBus, route, origin, destination, date, pricePerSeat)
+                  ),
+                  map(() => ({ ticketId, trip: updatedTrip, rotated: true })),
+                  tap(() => console.log('[Rotated to bus]', nextBus.id))
+                )
+              })
+            );
+          })
+        );
+      })
+    );
+  }
 
-// for drivers to report thier return to join the queue
-reportReturn(busId: string): Observable<void> {
-  return defer(() =>
-    runInInjectionContext(this.injector, () => {
-      const busesRef = collection(this.firestore, 'busses');
-      const busRef = doc(this.firestore, 'busses', busId);
+  getCurrentTrip(route: string, origin: string, destination: string,
+    date: string, pricePerSeat: number): Observable<Trip | null> {
+    return this.getMovingBus().pipe(
+      switchMap((movingBus) => {
+        if (!movingBus) throw new Error('No active bus available for this route right now');
 
-      // Find current max queueOrder among active buses
-      const q = query(
-        busesRef,
-        where('status', '==', 'active'),
-        orderBy('queueOrder', 'desc'),
-        limit(1)
-      );
+        return this.getOpenTrip(movingBus.id, route, date).pipe(
+          switchMap((existingTrip) => {
+            if (existingTrip) return of(existingTrip);
 
-      return from(getDocs(q)).pipe(
-        switchMap((snapshot) => {
-          const maxQueueOrder = snapshot.empty
-            ? 0  // no active buses — this bus becomes first in queue
-            : (snapshot.docs[0].data()['queueOrder'] as number);
+            // No open trip yet for this bus — create one
+            return this.createTrip(movingBus, route, origin, destination, date, pricePerSeat);
+          })
+        );
+      })
+    );
+  }
 
-          const newQueueOrder = maxQueueOrder + 1;
+  // for drivers to report thier return to join the queue
+  reportReturn(busId: string): Observable<void> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const busesRef = collection(this.firestore, 'busses');
+        const busRef = doc(this.firestore, 'busses', busId);
 
-          return from(updateDoc(busRef, {
-            status: 'active',
-            queueOrder: newQueueOrder,
-            returnedAt: new Date(), // useful for audit/admin view
-          }));
-        })
-      );
-    })
-  );
-}
+        // Find current max queueOrder among active buses
+        const q = query(
+          busesRef,
+          where('status', '==', 'active'),
+          orderBy('queueOrder', 'desc'),
+          limit(1)
+        );
+
+        return from(getDocs(q)).pipe(
+          switchMap((snapshot) => {
+            const maxQueueOrder = snapshot.empty
+              ? 0  // no active buses — this bus becomes first in queue
+              : (snapshot.docs[0].data()['queueOrder'] as number);
+
+            const newQueueOrder = maxQueueOrder + 1;
+
+            return from(updateDoc(busRef, {
+              status: 'active',
+              queueOrder: newQueueOrder,
+              returnedAt: new Date(), // useful for audit/admin view
+            }));
+          })
+        );
+      })
+    );
+  }
+
+  reorderQueue(): Observable<void> {
+    return defer(() =>
+      runInInjectionContext(this.injector, () => {
+        const busesRef = collection(this.firestore, 'busses');
+        const q = query(
+          busesRef,
+          where('status', '==', 'active'),
+          orderBy('queueOrder', 'asc')
+        );
+
+        return from(getDocs(q)).pipe(
+          switchMap((snapshot) => {
+            if (snapshot.empty) return of(undefined);
+
+            //Reassign queueOrder 1, 2, 3... to all active buses
+            return from(
+              runTransaction(this.firestore, async (transaction) => {
+                snapshot.docs.forEach((d, index) => {
+                  transaction.update(d.ref, { queueOrder: index + 1 });
+                });
+              })
+            );
+          }),
+          map(() => undefined)
+        );
+      })
+    );
+  }
 }

@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, map, switchMap, withLatestFrom, exhaustMap } from 'rxjs/operators';
+import { catchError, map, switchMap, withLatestFrom, exhaustMap, tap } from 'rxjs/operators';
 import { TicketService } from '../../services/ticket.service';
-import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS, LOAD_TODAY_SUMMARY, LOAD_TODAY_SUMMARY_FAILURE, LOAD_TODAY_SUMMARY_SUCCESS } from './tickets.action';
+import { ISSUE_TICKET, ISSUE_TICKET_FAILURE, ISSUE_TICKET_SUCCESS, LOAD_ADMIN_SUMMARY, LOAD_ADMIN_SUMMARY_FAILURE, LOAD_ADMIN_SUMMARY_SUCCESS, LOAD_RECENT_TICKET, LOAD_RECENT_TICKET_FAILURE, LOAD_RECENT_TICKET_SUCCESS, LOAD_TODAY_SUMMARY, LOAD_TODAY_SUMMARY_FAILURE, LOAD_TODAY_SUMMARY_SUCCESS } from './tickets.action';
 import { selectCurrentUser } from '../auth/auth.selectors';
 import { Store } from '@ngrx/store';
 import { TripService } from '@core/services/trip.service';
@@ -35,6 +35,18 @@ export class TicketEffects {
     )
   );
 
+  loadRecentTickets$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(LOAD_RECENT_TICKET),
+      switchMap(() =>
+        this.ticketService.getRecentTickets().pipe(
+          map(tickets => LOAD_RECENT_TICKET_SUCCESS({ tickets })),
+          catchError(err => of(LOAD_RECENT_TICKET_FAILURE({ error: err.message })))
+        )
+      )
+    )
+  );
+
   loadTodaySummary$ = createEffect(() =>
     this.actions$.pipe(
       ofType(LOAD_TODAY_SUMMARY),
@@ -49,5 +61,17 @@ export class TicketEffects {
         );
       })
     )
+);
+
+loadAdminSummary$ = createEffect(() =>
+  this.actions$.pipe(
+    ofType(LOAD_ADMIN_SUMMARY),
+    switchMap(() =>
+      this.ticketService.getAdminDailySummary().pipe(
+        map(summary => LOAD_ADMIN_SUMMARY_SUCCESS({ summary })),
+        catchError(err => of(LOAD_ADMIN_SUMMARY_FAILURE({ error: err.message })))
+      )
+    )
+  )
 );
 }

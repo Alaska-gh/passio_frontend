@@ -1,3 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+body:has(.loading-overlay) {
+  overflow: hidden;
+}
+
+.p-inputtext:focus,
+.p-select.p-focus {
+  border-color: #d1d5db !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.p-select-option:hover {
+  background: #f97316 !important;
+  color: white !important;
+}
+
+.p-select-option.p-select-option-selected {
+  background: #ea580c !important;
+  color: white !important;
+}

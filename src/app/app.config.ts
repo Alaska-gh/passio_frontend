@@ -30,12 +30,14 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { environment } from '@env/environment';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastEffects } from '@core/store/toast/toast.effects';
 import { ActiveRouteEffects } from '@core/store/routes/route.effects';
 import { getApp } from 'firebase/app';
 import { TripsEffects } from '@core/store/trips/trips.effects';
 import { TicketEffects } from '@core/store/tickets/tickets.effects';
+import { ConfirmDialogEffects } from '@core/store/dialog/confirm-dialog.effects';
+import { DialogService } from 'primeng/dynamicdialog';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -63,7 +65,16 @@ export const appConfig: ApplicationConfig = {
 
     provideStore(reducers, { metaReducers }), 
 
-    provideEffects([AuthEffects, TripsEffects, TicketEffects, BusesEffects, ToastEffects, ActiveRouteEffects, BusesEffects]),
+    provideEffects([
+      AuthEffects,
+      TripsEffects, 
+      TicketEffects, 
+      BusesEffects, 
+      ToastEffects, 
+      ActiveRouteEffects, 
+      BusesEffects,
+      ConfirmDialogEffects
+    ]),
 
     provideStoreDevtools({
       maxAge: 25,
@@ -84,17 +95,11 @@ export const appConfig: ApplicationConfig = {
 
     provideFunctions(() => {
       const fns = getFunctions();
-      if (environment.useEmulators) {
-        connectFunctionsEmulator(fns, 'localhost', 5001);
-      }
       return fns;
     }),
 
     provideStorage(() => {
       const storage = getStorage();
-      if (environment.useEmulators) {
-        connectStorageEmulator(storage, 'localhost', 9199);
-      }
       return storage;
     }),
 
@@ -104,5 +109,8 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
+    
+    ConfirmationService,
+    DialogService
   ],
 };

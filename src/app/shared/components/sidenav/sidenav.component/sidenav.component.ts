@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { User } from '@core/interfaces';
@@ -10,6 +10,8 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { DividerModule } from 'primeng/divider';
 import * as AuthActions from '@core/store/auth/auth.actions';
 import { filter, of, Subject, takeUntil, tap } from 'rxjs';
+import { PrimeNgSeverity } from '@core/interfaces/primeng-severity.enums';
+import { OPEN_CONFIRM_DIALOG } from '@core/store/dialog/dialog-config.actions';
 
 @Component({
   selector: 'app-sidenav',
@@ -21,10 +23,10 @@ import { filter, of, Subject, takeUntil, tap } from 'rxjs';
 export class SidenavComponent {
   @Input() sidenavOpened!: boolean;
   @Input() isPeeking!: boolean;
+  @Output() closeNav = new EventEmitter<void>();
 
   navItems: MenuItem[] = [];
   user!: User;
-  unreadNotificationsCount!: number;
   destroy$ = new Subject<void>();
 
   private store = inject(Store)
@@ -34,7 +36,7 @@ export class SidenavComponent {
     this.store.select(selectCurrentUser).pipe(
       filter((user): user is User => user !== null),
       takeUntil(this.destroy$),
-      tap((user: User) => {
+      tap((user: User) => {        
         this.user = user;
         this.setMenuItems()
       })
@@ -44,7 +46,28 @@ export class SidenavComponent {
   private setMenuItems() {    
     if (!this.user) return;
     if(this.user.role === 'admin'){
-      this.navItems = []
+       this.navItems = [
+        { 
+           label: 'Dashboard', 
+           icon: 'fas fa-home', 
+           routerLink: '/admin/dashboard'
+          },
+        { 
+          label: 'Bus management', 
+          icon: 'fas fa-car',
+          routerLink: '/admin/buses'
+         },
+        { 
+          label: 'Tickets', 
+          icon: 'fas fa-ticket', 
+          routerLink: '/admin/tickets'
+        },
+        { 
+          label: 'Routes', 
+          icon: 'fas fa-map',
+          routerLink: '/admin/routes'
+        },
+      ];
     }
 
     if (this.user.role === 'cashier') {
@@ -66,15 +89,46 @@ export class SidenavComponent {
         },
       ];
     }
+    if (this.user.role === 'driver') {
+      this.navItems = [
+        {
+          label: 'Home',
+          icon: 'fas fa-home',
+          routerLink: '/driver/home',
+        },
+        {
+          label: 'Queue',
+          icon: 'fas fa-bus',
+          routerLink: '/driver/queue',
+        },
+        {
+          label: 'History',
+          icon: 'fas fa-history',
+          routerLink: '/driver/history'
+        },
+      ];
+    }
   }
 
-  logout() {
-    this.store.dispatch(AuthActions.SIGNOUT());
-  }
+    logout() {
+      console.log('logged out');
+      
+      this.store.dispatch(OPEN_CONFIRM_DIALOG({
+        header: 'Confirm Logout',
+        message:'Are you sure you want to log out?',
+        acceptLabel: 'Signout',
+        acceptAction: AuthActions.SIGNOUT(),
+        confirmType: PrimeNgSeverity.DANGER
+      }));
+    }
 
   isActive(route: string): boolean {
     return this.router.url === route;
   }
+
+onNavItemClick(): void {
+  this.closeNav.emit();
+}
 
   ngOnDestroy(): void {
     this.destroy$.next();

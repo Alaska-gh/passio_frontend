@@ -1,0 +1,44 @@
+name: Firebase Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Generate environment
+        run: node scripts/generate-env.js
+        env:
+          API_KEY: ${{ github.ref == 'refs/heads/dev' && secrets.API_KEY_DEV || secrets.API_KEY_PROD }}
+          AUTH_DOMAIN: ${{ github.ref == 'refs/heads/dev' && secrets.AUTH_DOMAIN_DEV || secrets.AUTH_DOMAIN_PROD }}
+          PROJECT_ID: ${{ github.ref == 'refs/heads/dev' && secrets.PROJECT_ID_DEV || secrets.PROJECT_ID_PROD }}
+          STORAGE_BUCKET: ${{ github.ref == 'refs/heads/dev' && secrets.STORAGE_BUCKET_DEV || secrets.STORAGE_BUCKET_PROD }}
+          MESSAGE_SENDER_ID: ${{ github.ref == 'refs/heads/dev' && secrets.MESSAGE_SENDER_ID_DEV || secrets.MESSAGE_SENDER_ID_PROD }}
+          APP_ID: ${{ github.ref == 'refs/heads/dev' && secrets.APP_ID_DEV || secrets.APP_ID_PROD }}
+
+          PRODUCTION: ${{ github.ref == 'refs/heads/master' && 'true' || 'false' }}
+
+      - run: npm run build -- --configuration production
+
+      - run: npm install -g firebase-tools
+
+      - name: Deploy Staging
+        if: github.ref == 'refs/heads/dev'
+        run: firebase deploy --only hosting:staging --token ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Deploy Production
+        if: github.ref == 'refs/heads/master'
+        run: firebase deploy --only hosting:production --token ${{ secrets.FIREBASE_TOKEN }}

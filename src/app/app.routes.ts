@@ -34,18 +34,18 @@ export const routes: Routes = [
   },
 
   //  Admin dashboard
-  // {
-  //   path: 'admin',
-  //   canActivate: [authGuard, roleGuard(['admin'])],
-  //   loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
-  // },
+  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard(['admin'])],
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
 
   //  Driver app
-  // {
-  //   path: 'driver',
-  //   canActivate: [authGuard, roleGuard(['driver'])],
-  //   loadChildren: () => import('./features/driver/driver.routes').then((m) => m.DRIVER_ROUTES),
-  // },
+  {
+    path: 'driver',
+    canActivate: [authGuard, roleGuard(['driver'])],
+    loadChildren: () => import('./features/driver/driver.routes').then((m) => m.DRIVER_ROUTES),
+  },
 
   //  Conductor scanner
   // {

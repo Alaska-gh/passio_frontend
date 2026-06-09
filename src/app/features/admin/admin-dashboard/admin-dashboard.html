@@ -1,0 +1,64 @@
+<div class="p-6 flex flex-col gap-5">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
+      <p class="text-sm text-gray-400">Today's overview</p>
+    </div>
+    <div>
+        <p>{{today}}</p>
+    </div>
+  </div>
+
+  @if (todaySummary$ | async; as summary) {
+    <div class="grid grid-cols-4 gap-3">
+      <div class="bg-gray-100 rounded-xl p-4">
+        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Tickets issued</p>
+        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.totalTickets }}</p>
+        <p class="text-xs text-gray-400 mt-1">Today</p>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-4">
+        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Revenue</p>
+        <p class="text-2xl font-semibold text-gray-800 mt-1">GHS {{ summary.totalRevenue | number }}</p>
+        <p class="text-xs text-gray-400 mt-1">Today</p>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-4">
+        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Active buses</p>
+        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.activeBuses }}</p>
+        <p class="text-xs text-gray-400 mt-1">In queue</p>
+      </div>
+      <div class="bg-gray-100 rounded-xl p-4">
+        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">On-trip</p>
+        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.busesOnTrip }}</p>
+        <p class="text-xs text-gray-400 mt-1">Departed</p>
+      </div>
+    </div>
+  }
+
+  <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+      <span class="text-sm font-semibold text-gray-700">Recent tickets</span>
+      <a routerLink="/admin/tickets" class="text-xs text-orange-400 hover:text-orange-700 cursor-pointer">View all</a>
+    </div>
+    <p-table [value]="(recentTickets$ | async) ?? []" [loading]="!!(recentTicketsLoading$ | async)" [rows]="5">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Ticket #</th><th>Passenger</th><th>Route</th><th>Bus</th><th>Seats</th><th>Amount</th><th>Issued</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ticket>
+        <tr>
+          <td><code>{{ ticket.ticketNumber }}</code></td>
+          <td>{{ ticket.passengerName }}</td>
+          <td>{{ ticket.route }}</td>
+          <td>{{ ticket.busPlateNumber }}</td>
+          <td>{{ ticket.numberOfSeats }}</td>
+          <td>GHS {{ ticket.totalAmount }}</td>
+          <td>{{ ticket.issuedAt | date:'shortTime' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="6" class="text-center text-gray-400 py-8">No tickets today</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
