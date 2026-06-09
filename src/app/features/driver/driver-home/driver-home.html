@@ -4,7 +4,8 @@
   <ng-container *ngIf="currentUser">
     <div>
       <h2 class="text-lg font-bold text-gray-800">
-        Good {{ getGreeting() }}, <span class="capitalize">{{ currentUser.name || currentUser.role }}</span> 
+        Good {{ getGreeting() }}, <span class="capitalize">
+          {{ currentUser.name || currentUser.role }}</span> 
       </h2>
       <p class="text-sm text-gray-400 mt-0.5">{{ today }}</p>
     </div>
@@ -17,7 +18,8 @@
         <p class="text-sm font-semibold text-gray-700">Bus request pending</p>
       </div>
       <p class="text-sm text-gray-500">
-        Your request to add <strong>{{ request.plateNumber }}</strong> is waiting for admin approval.
+        Your request to add <strong>{{ request.plateNumber }}</strong> 
+        is waiting for admin approval.
       </p>
       <p class="text-xs text-gray-400 mt-1">
         Submitted {{ request.requestedAt | date:'medium' }}
@@ -36,7 +38,8 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm">
       <div class="flex items-start justify-between mb-4">
         <div>
-          <p class="text-xs text-gray-400 uppercase tracking-widest font-medium mb-1">Your bus</p>
+          <p class="text-xs text-gray-400 uppercase tracking-widest font-medium mb-1">
+            Your bus</p>
           <h2 class="text-2xl font-bold text-gray-800">{{ bus.plateNumber }}</h2>
           <p class="text-sm text-gray-400 capitalize mt-0.5">
             {{ bus.busType }} · {{ bus.capacity }} seats
@@ -47,7 +50,8 @@
 
       @if (bus.queueOrder != null) {
         <div class="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-3 mb-4">
-          <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-bold text-sm">
+          <span class="inline-flex items-center justify-center w-9 h-9 rounded-full
+           bg-orange-100 text-orange-600 font-bold text-sm">
             {{ bus.queueOrder }}
           </span>
           <div>
@@ -81,7 +85,9 @@
     <div class="bg-white rounded-2xl p-5 shadow-sm text-center">
       <i class="fas fa-bus text-4xl text-gray-200 mb-3 block"></i>
       <p class="text-sm font-semibold text-gray-600">No Bus Assigned</p>
-      <p class="text-xs text-gray-400 mt-1">You can sign on to yor own bus or someone's bus or contact admin to assign a bus to you</p>
+      <p class="text-xs text-gray-400 mt-1">
+        You can sign on to yor own bus or someone's bus or contact admin to assign a bus to you
+      </p>
        <p-button
           label="Sign on to bus"
           icon="fas fa-user-edit"
@@ -103,7 +109,8 @@
             <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
             <div>
               <p class="text-sm font-semibold text-gray-700">{{ bus.plateNumber }}</p>
-              <p class="text-xs text-gray-400 capitalize">{{ bus.busType }} · {{ bus.capacity }} seats</p>
+              <p class="text-xs text-gray-400 capitalize">
+                {{ bus.busType }} · {{ bus.capacity }} seats</p>
             </div>
           </li>
         }
