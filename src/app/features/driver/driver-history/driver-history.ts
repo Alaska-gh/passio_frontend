@@ -29,7 +29,7 @@ export class DriverHistory {
       filter((user): user is User => user !== null),
       switchMap(user =>
         this.store.select(selectAllBuses).pipe(
-          map(buses => buses.find(b => b.assignedDriverId === user.uid) ?? null)
+          map(buses => buses.find(b => b.driverId === user.uid) ?? null)
         )
       ),
       filter((bus): bus is Bus => bus !== null),

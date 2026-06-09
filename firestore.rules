@@ -23,7 +23,8 @@ service cloud.firestore {
 
     match /busses/{busId} {
       allow read:  if isSignedIn();
-      allow write: if isAdmin() || isCashier();
+      allow write: if isAdmin();
+      allow update: if isAdmin() || isDriver() || isCashier()
     }
 
     match /routes/{routeId} {
@@ -31,11 +32,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /schedules/{scheduleId} {
-      allow read:           if true;
-      allow create, update: if isAdmin();
-      allow delete:         if false;
-    }
 
     match /tickets/{ticketId} {
       allow read:   if isOwner(resource.data.customerId) || isAdmin() || isConductor() || isCashier();
@@ -70,6 +66,14 @@ service cloud.firestore {
 
     match /auditLog/{logId} {
       allow read, write: if false;
+    }
+
+    match /busRequests/{requestId} {
+      allow read: if isAdmin() || 
+        (isDriver() && resource.data.driverId == uid());
+      allow create: if isDriver();
+      allow update: if isAdmin();
+      allow delete: if false;
     }
   }
 }

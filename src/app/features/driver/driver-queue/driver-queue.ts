@@ -31,11 +31,8 @@ export class DriverQueue {
       tap(user => this.currentUser = user)
     ).subscribe();
 
-    this.queuedBuses$.subscribe((buses) => console.log(buses)
-    )
-
     this.assignedBus$ = this.store.select(selectAllBuses).pipe(
-      map(buses => buses.find(b => b.assignedDriverId === this.currentUser?.uid) ?? null)
+      map(buses => buses.find(b => b.driverId === this.currentUser?.uid) ?? null)
     );
   }
 

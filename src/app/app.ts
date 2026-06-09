@@ -74,9 +74,7 @@ export class App implements OnInit {
     } else {
       this.store.select(selectSidenavOpened).pipe(
         takeUntil(this.destroy$)
-      ).subscribe((sidenavOpened: boolean) => {
-        console.log(sidenavOpened);
-        
+      ).subscribe((sidenavOpened: boolean) => {        
         this.sidenavOpened = sidenavOpened
       });
     }

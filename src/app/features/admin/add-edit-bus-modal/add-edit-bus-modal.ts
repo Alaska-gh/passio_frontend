@@ -45,7 +45,7 @@ export class AddEditBusModal {
       plateNumber: [existing?.plateNumber ?? '', Validators.required],
       busType: [existing?.busType ?? 'normal', Validators.required],
       capacity: [existing?.capacity ?? '', [Validators.required, Validators.min(1)]],
-      driverId: [existing?.assignedDriverId ?? null],
+      driverId: [existing?.driverId ?? null],
     });
 
     this.loadDrivers();

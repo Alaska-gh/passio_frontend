@@ -6,9 +6,22 @@ export interface Bus {
   capacity: number;
   status: BusStatus;
   model?: string;
-  assignedDriverId?: string;
-  assignedDriverName: string | null;
-  createdAt: Date;
+  driverId: string | null;
+  driverName: string | null;
+  createdAt?: Date;
   busType: string;
   queueOrder: number | null;
+}
+
+export interface BusRequest {
+  id?: string;
+  plateNumber: string;
+  busType: 'normal' | 'express' | 'vip';
+  capacity: number;
+  driverId: string;
+  driverName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: Date;
+  reviewedAt?: Date;
+  reviewedBy?: string;
 }

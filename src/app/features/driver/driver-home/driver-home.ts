@@ -6,13 +6,15 @@ import { LOAD_BUS_TRIP_HISTORY, LOAD_BUSES } from '@core/store/buses/buses.actio
 import { selectAllBuses, selectBusesLoading, selectHistoryLoading, selectQueuedBuses, selectSelectedBusTripHistory } from '@core/store/buses/buses.selector';
 import { Store } from '@ngrx/store';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { filter, map, Observable, Subject, takeUntil, tap } from 'rxjs';
+import { filter, map, Observable, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { SignOffModal } from '../sign-off-modal/sign-off-modal';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { StatusSeverity } from '@core/interfaces/status-severity';
+import { BusService } from '@core/services/bus.service';
+import { SignOnModal } from '../sign-on-modal/sign-on-modal';
 
 @Component({
   selector: 'app-driver-home',
@@ -29,7 +31,10 @@ export class DriverHome {
  today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
-
+pendingRequest$ = this.store.select(selectCurrentUser).pipe(
+  filter((u): u is User => u !== null),
+  switchMap(user => this.busService.getDriverPendingRequest(user.uid))
+);
  private destroy$ = new Subject<void>();
  private ref!: DynamicDialogRef | null;
 
@@ -37,6 +42,7 @@ export class DriverHome {
     private store: Store,
     private tripService: TripService,
     private dialogService: DialogService,
+    private busService: BusService
   ) {}
 
 
@@ -51,7 +57,7 @@ export class DriverHome {
 
     //Derive assigned bus from store — no separate state needed
     this.assignedBus$ = this.allBuses$.pipe(
-      map(buses => buses.find(b => b.assignedDriverId === this.currentUser?.uid) ?? null)
+      map(buses => buses.find(b => b.driverId === this.currentUser?.uid) ?? null)
     );
   }
 
@@ -66,9 +72,9 @@ export class DriverHome {
     });
   }
 
- openSignOffModal(bus: Bus): void {
+  openSignOffModal(bus: Bus): void {
     this.ref = this.dialogService.open(SignOffModal, {
-      header: 'Sign off for another driver',
+      header: 'Sign Off From Bus',
       width: '92vw',
       style: { 'max-width': '420px' },
       data: { bus },
@@ -77,16 +83,17 @@ export class DriverHome {
       if (newDriver) this.store.dispatch(LOAD_BUSES());
     });
   }
- openSignOnModal(): void {
-    this.ref = this.dialogService.open(SignOffModal, {
-      header: 'Sign on to a bus',
-      width: '92vw',
-      style: { 'max-width': '420px' },
-    });
-    this.ref?.onClose.pipe(takeUntil(this.destroy$)).subscribe((newDriver) => {
-      if (newDriver) this.store.dispatch(LOAD_BUSES());
-    });
-  }
+
+  openSignOnModal(): void {
+  this.ref = this.dialogService.open(SignOnModal, {
+    header: 'Sign on to bus',
+    width: '92vw',
+    style: { 'max-width': '480px' },
+  });
+  this.ref?.onClose.pipe(takeUntil(this.destroy$)).subscribe((signed) => {
+    if (signed) this.store.dispatch(LOAD_BUSES());
+  });
+}
 
   getStatusSeverity(status: BusStatus): StatusSeverity {
     const map: Record<BusStatus, StatusSeverity> = {
@@ -98,7 +105,7 @@ export class DriverHome {
     return map[status] ?? 'secondary';
   }
 
-   getGreeting(): string {
+  getGreeting(): string {
     const hour = new Date().getHours();
     if (hour < 12) return 'morning';
     if (hour < 17) return 'afternoon';

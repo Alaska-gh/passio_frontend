@@ -10,6 +10,21 @@
     </div>
   </ng-container>
 
+  @if (pendingRequest$ | async; as request) {
+    <div class="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-2">
+        <i class="fas fa-clock text-orange-500 text-xl"></i>
+        <p class="text-sm font-semibold text-gray-700">Bus request pending</p>
+      </div>
+      <p class="text-sm text-gray-500">
+        Your request to add <strong>{{ request.plateNumber }}</strong> is waiting for admin approval.
+      </p>
+      <p class="text-xs text-gray-400 mt-1">
+        Submitted {{ request.requestedAt | date:'medium' }}
+      </p>
+    </div>
+  }
+
   <!-- Assigned bus card -->
   @if (busLoading$ | async) {
     <div class="bg-white rounded-2xl p-5 space-y-3">
@@ -49,28 +64,28 @@
         @if (bus.status === 'on-trip') {
           <p-button
             label="Report Return to Station"
-            icon="pi pi-map-marker"
+            icon="fas fa-map-marker"
             styleClass="w-full bg-green-600! border-green-600! text-white! hover:bg-green-700!"
             [loading]="reportingReturn"
             (onClick)="reportReturn(bus)" />
         }
         <p-button
-          label="Sign Off for Another Driver"
-          icon="pi pi-user-edit"
-          severity="secondary"
+          label="Sign Off"
+          icon="fas fa-user-edit"
+          severity="warn"
           styleClass="w-full"
           (onClick)="openSignOffModal(bus)" />
       </div>
     </div>
   } @else {
     <div class="bg-white rounded-2xl p-5 shadow-sm text-center">
-      <i class="pi pi-bus text-4xl text-gray-200 mb-3 block"></i>
+      <i class="fas fa-bus text-4xl text-gray-200 mb-3 block"></i>
       <p class="text-sm font-semibold text-gray-600">No Bus Assigned</p>
       <p class="text-xs text-gray-400 mt-1">You can sign on to yor own bus or someone's bus or contact admin to assign a bus to you</p>
        <p-button
           label="Sign on to bus"
-          icon="pi pi-user-edit"
-          severity="secondary"
+          icon="fas fa-user-edit"
+          severity="warn"
           styleClass="w-full"
           (onClick)="openSignOnModal()" />
     </div>

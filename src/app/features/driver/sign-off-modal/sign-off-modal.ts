@@ -19,6 +19,7 @@ export class SignOffModal {
   bus: Bus | null = null;
   drivers: User[] = [];
   selectedDriverId: string | null = null;
+  mode: 'resign' | 'handover' = 'resign'
   loading = false;
   saving = false;
 
@@ -40,14 +41,30 @@ export class SignOffModal {
     this.busService.getDrivers().subscribe({
       next: (drivers) => {
         // Exclude current driver from list
-        this.drivers = drivers.filter(d => d.uid !== this.bus?.assignedDriverId);
+        this.drivers = drivers.filter(d => d.uid !== this.bus?.driverId);
         this.loading = false;
       },
       error: () => { this.loading = false; }
     });
   }
 
-  confirm(): void {
+  resign(): void {
+    if(!this.bus) return
+
+    this.saving = true;    
+    this.store.dispatch(UPDATE_BUS({
+      busId: this.bus.id,
+      updates: {
+        driverId: null,
+        driverName: null,
+      }
+    }));
+
+    this.dialogRef.close({action: 'resign'});
+  }
+
+
+  handover(): void {
     if (!this.selectedDriverId || !this.bus) return;
     const newDriver = this.drivers.find(d => d.uid === this.selectedDriverId);
     if (!newDriver) return;
@@ -56,12 +73,12 @@ export class SignOffModal {
     this.store.dispatch(UPDATE_BUS({
       busId: this.bus.id,
       updates: {
-        assignedDriverId: newDriver.uid,
-        assignedDriverName: `${newDriver.name}`,
+        driverId: newDriver.uid,
+        driverName: `${newDriver.name}`,
       }
     }));
 
-    this.dialogRef.close(newDriver);
+    this.dialogRef.close({action: 'handover', newDriver});
   }
 
   cancel(): void { this.dialogRef.close(null); }

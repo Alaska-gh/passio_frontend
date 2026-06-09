@@ -14,7 +14,7 @@ export const selectActiveBuses = createSelector(selectAllBuses, (buses) =>
 export const selectQueuedBuses = createSelector(
   selectAllBuses,
   (buses) => buses
-    .filter(b => b)
+    .filter(bus => bus)
     .sort((a, b) => (a.queueOrder ?? 999) - (b.queueOrder ?? 999))
     .slice(0, 10)
 );
