@@ -96,12 +96,11 @@
 
   <!-- Recent Tickets -->
   <div
-    class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden"
-  >
+    class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
 
     <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-5 py-4 border-b border-gray-100"
-    >
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between
+       px-5 py-4 border-b border-gray-100">
 
       <div>
         <h2 class="font-semibold text-gray-800">
@@ -126,7 +125,7 @@
 
       @if (recentTicketsLoading$ | async) {
 
-        <div class="gap-3">
+        <div class="flex flex-col gap-3">
 
           @for (i of [1,2,3,4,5,6]; track i) {
 
@@ -148,13 +147,10 @@
 
       } @else {
 
-        <div
-         class="gap-3"
-        >
-
+        <div class="flex flex-col gap-3">
           @for (ticket of (recentTickets$ | async) ?? []; track ticket.id) {
 
-            <div class="border border-gray-50 p-4 md:p-5 transition-all">
+            <div class="border border-gray-100 p-4 md:p-5 transition-all">
               <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
                   <div>
                     <p class="text-xs uppercase text-gray-400">
