@@ -1,64 +1,247 @@
-<div class="p-6 flex flex-col gap-5">
-  <div class="flex items-center justify-between">
+<div class="w-ful p-4 md:p-6 mx-4 md:mx-0">
+
+  <!-- Header -->
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+
     <div>
-      <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
-      <p class="text-sm text-gray-400">Today's overview</p>
+      <h1 class="text-2xl font-semibold text-gray-800">
+        Dashboard
+      </h1>
+
+      <p class="text-sm text-gray-500">
+        Today's overview
+      </p>
     </div>
-    <div>
-        <p>{{today}}</p>
+
+    <div class="text-sm text-gray-400">
+      {{ today | date:'fullDate' }}
     </div>
+
   </div>
 
   @if (todaySummary$ | async; as summary) {
-    <div class="grid grid-cols-4 gap-3">
-      <div class="bg-gray-100 rounded-xl p-4">
-        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Tickets issued</p>
-        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.totalTickets }}</p>
-        <p class="text-xs text-gray-400 mt-1">Today</p>
+
+    <!-- Summary -->
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6"
+    >
+
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm"
+      >
+        <p class="text-xs uppercase tracking-wider text-gray-400">
+          Tickets Issued
+        </p>
+
+        <p class="text-3xl font-semibold text-gray-800 mt-3">
+          {{ summary.totalTickets }}
+        </p>
+
+        <p class="text-xs text-gray-400 mt-1">
+          Today
+        </p>
       </div>
-      <div class="bg-gray-100 rounded-xl p-4">
-        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Revenue</p>
-        <p class="text-2xl font-semibold text-gray-800 mt-1">GHS {{ summary.totalRevenue | number }}</p>
-        <p class="text-xs text-gray-400 mt-1">Today</p>
+
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm"
+      >
+        <p class="text-xs uppercase tracking-wider text-gray-400">
+          Revenue
+        </p>
+
+        <p class="text-3xl font-semibold text-gray-800 mt-3 break-words">
+          GHS {{ summary.totalRevenue | number }}
+        </p>
+
+        <p class="text-xs text-gray-400 mt-1">
+          Today
+        </p>
       </div>
-      <div class="bg-gray-100 rounded-xl p-4">
-        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">Active buses</p>
-        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.activeBuses }}</p>
-        <p class="text-xs text-gray-400 mt-1">In queue</p>
+
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm"
+      >
+        <p class="text-xs uppercase tracking-wider text-gray-400">
+          Active Buses
+        </p>
+
+        <p class="text-3xl font-semibold text-gray-800 mt-3">
+          {{ summary.activeBuses }}
+        </p>
+
+        <p class="text-xs text-gray-400 mt-1">
+          In Queue
+        </p>
       </div>
-      <div class="bg-gray-100 rounded-xl p-4">
-        <p class="text-xs uppercase tracking-widest text-gray-400 font-medium">On-trip</p>
-        <p class="text-2xl font-semibold text-gray-800 mt-1">{{ summary.busesOnTrip }}</p>
-        <p class="text-xs text-gray-400 mt-1">Departed</p>
+
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm"
+      >
+        <p class="text-xs uppercase tracking-wider text-gray-400">
+          On Trip
+        </p>
+
+        <p class="text-3xl font-semibold text-gray-800 mt-3">
+          {{ summary.busesOnTrip }}
+        </p>
+
+        <p class="text-xs text-gray-400 mt-1">
+          Departed
+        </p>
       </div>
+
     </div>
+
   }
 
-  <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-      <span class="text-sm font-semibold text-gray-700">Recent tickets</span>
-      <a routerLink="/admin/tickets" class="text-xs text-orange-400 hover:text-orange-700 cursor-pointer">View all</a>
+  <!-- Recent Tickets -->
+  <div
+    class="bg-white overflow-hidden">
+
+    <div
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between
+       px-5 py-4 border-b border-gray-100">
+
+      <div>
+        <h2 class="font-semibold text-gray-800">
+          Recent Tickets
+        </h2>
+
+        <p class="text-sm text-gray-400">
+          Latest ticket activity
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/tickets"
+        class="text-sm font-medium text-orange-500 hover:text-orange-600"
+      >
+        View All
+      </a>
+
     </div>
-    <p-table [value]="(recentTickets$ | async) ?? []" [loading]="!!(recentTicketsLoading$ | async)" [rows]="5">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Ticket #</th><th>Passenger</th><th>Route</th><th>Bus</th><th>Seats</th><th>Amount</th><th>Issued</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-ticket>
-        <tr>
-          <td><code>{{ ticket.ticketNumber }}</code></td>
-          <td>{{ ticket.passengerName }}</td>
-          <td>{{ ticket.route }}</td>
-          <td>{{ ticket.busPlateNumber }}</td>
-          <td>{{ ticket.numberOfSeats }}</td>
-          <td>GHS {{ ticket.totalAmount }}</td>
-          <td>{{ ticket.issuedAt | date:'shortTime' }}</td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr><td colspan="6" class="text-center text-gray-400 py-8">No tickets today</td></tr>
-      </ng-template>
-    </p-table>
+
+    <div class="p-4 md:p-5">
+
+      @if (recentTicketsLoading$ | async) {
+
+        <div class="flex flex-col gap-3">
+
+          @for (i of [1,2,3,4,5,6]; track i) {
+
+            <div
+              class="border border-gray-100 rounded-2xl p-4"
+            >
+              <p-skeleton width="40%" class="mb-4"></p-skeleton>
+
+              <p-skeleton width="100%" class="mb-2"></p-skeleton>
+
+              <p-skeleton width="70%" class="mb-2"></p-skeleton>
+
+              <p-skeleton width="50%"></p-skeleton>
+            </div>
+
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="flex flex-col gap-3">
+          @for (ticket of (recentTickets$ | async) ?? []; track ticket.id) {
+
+            <div class="border border-gray-100 p-4 md:p-5 transition-all rounded-md">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                  <div>
+                    <p class="text-xs uppercase text-gray-400">
+                      Ticket ID
+                    </p>
+                    <code class="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
+                      {{ ticket.ticketNumber }}
+                    </code>
+                  </div>
+
+                    <div>
+                      <p class="text-xs uppercase text-gray-400">
+                        Date
+                      </p>
+                      <span class="text-sm text-gray-400">
+                      {{ ticket.issuedAt | date:'medium' }}
+                    </span>
+                    </div>
+
+                    <div>
+                      <p class="text-xs uppercase text-gray-400">
+                        Passenger Name
+                      </p>
+                      <h3 class="font-semibold text-gray-800 text-base break-words">
+                        {{ ticket.passengerName }}
+                      </h3>
+                    </div>
+
+                   <div>
+                    <p class="text-xs uppercase text-gray-400">
+                      Route
+                    </p>
+                    <p class="text-sm text-gray-500 mt-1 break-words">
+                      {{ ticket.route }}
+                    </p>
+                   </div>
+
+                  <div>
+                    <p class="text-xs uppercase text-gray-400">
+                      Bus
+                    </p>
+
+                    <p class="font-medium text-gray-700">
+                      {{ ticket.busPlateNumber }}
+                    </p>
+                  </div>
+
+                   <div>
+                    <p class="text-xs uppercase text-gray-400">
+                      Seats
+                    </p>
+
+                    <p class="font-medium text-gray-700">
+                      {{ ticket.numberOfSeats }}
+                    </p>
+                  </div>
+
+                  <div>
+                     <p class="text-xs uppercase text-gray-400">
+                      Amount
+                    </p>
+
+                    <p class="font-semibold text-gray-800">
+                      GHS {{ ticket.totalAmount | number }}
+                    </p>
+                  </div>
+
+              </div>
+
+            </div>
+
+          } @empty {
+
+            <div
+              class="col-span-full py-16 text-center"
+            >
+
+              <p class="text-gray-400">
+                No tickets today
+              </p>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
   </div>
+
 </div>

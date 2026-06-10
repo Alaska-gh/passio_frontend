@@ -57,7 +57,11 @@ export class BusManagement {
   openAddBusModal(): void {
     this.ref = this.dialogService.open(AddEditBusModal, {
       header: 'Add new bus',
-      width: '55rem',
+      width: '50rem',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw'
+    }
     });
     this.ref?.onClose.pipe(takeUntil(this.destroy$)).subscribe((saved) => {
       if (saved) this.store.dispatch(LOAD_BUSES());
@@ -68,7 +72,11 @@ export class BusManagement {
   openEditBusModal(bus: Bus): void {
     this.ref = this.dialogService.open(AddEditBusModal, {
       header: 'Edit bus',
-      width: '55rem',
+      width: '50rem',
+      breakpoints: {
+        '960px': '75vw',
+        '640px': '90vw'
+      },
       data: bus,
     });
     this.ref?.onClose.pipe(takeUntil(this.destroy$)).subscribe((saved) => {
