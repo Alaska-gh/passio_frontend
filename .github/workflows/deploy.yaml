@@ -37,8 +37,8 @@ jobs:
 
       - name: Deploy Staging
         if: github.ref == 'refs/heads/dev'
-        run: firebase deploy --only hosting:staging --token ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --project passio-945fd --only hosting:staging --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Deploy Production
         if: github.ref == 'refs/heads/master'
-        run: firebase deploy --only hosting:production --token ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --project passio-945fd --only hosting:production --token ${{ secrets.FIREBASE_TOKEN }}
