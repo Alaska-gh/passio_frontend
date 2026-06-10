@@ -1,4 +1,4 @@
-<div class="p-4 md:p-6 space-y-6">
+<div class="p-4 md:p-6 space-y-6 mx-4 md:mx-0">
 
   <!-- Greeting -->
   <ng-container *ngIf="currentUser$ | async as user">
@@ -26,7 +26,7 @@
   <ng-container *ngIf="!(summaryLoading$ | async)">
     <ng-container *ngIf="summary$ | async as summary">
 
-      <div class="grid grid-cols-2 gap-3 md:grid-cols-3"> 
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"> 
         <div class="bg-white rounded-2xl p-4 shadow-sm">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Tickets Today</p>
           <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalTickets }}</p>
@@ -39,7 +39,7 @@
           <p class="text-xs text-gray-400 mt-1">Total collected</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 shadow-sm col-span-2 md:col-span-1">
+        <div class="bg-white rounded-2xl p-4 shadow-sm">
           <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Seats Sold</p>
           <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalSeats }}</p>
           <p class="text-xs text-gray-400 mt-1">Across all routes</p>

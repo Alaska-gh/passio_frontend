@@ -110,9 +110,7 @@ export class SidenavComponent {
     }
   }
 
-    logout() {
-      console.log('logged out');
-      
+    logout() {      
       this.store.dispatch(OPEN_CONFIRM_DIALOG({
         header: 'Confirm Logout',
         message:'Are you sure you want to log out?',
