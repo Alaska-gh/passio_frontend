@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "passio-945fd"
+  },
+  "targets": {
+    "passio-945fd": {
+      "hosting": {
+        "production": [
+          "passio-945fd"
+        ],
+        "staging": [
+          "passio-staging"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

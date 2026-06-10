@@ -9,7 +9,6 @@
 .firebase/
 firebase-debug.log
 firestore-debug.log
-.firebaserc
 src/environments/environment.prod.ts
 src/environments/environment.dev.ts
 .DS_Store
