@@ -95,17 +95,11 @@ export const appConfig: ApplicationConfig = {
 
     provideFunctions(() => {
       const fns = getFunctions();
-      if (environment.useEmulators) {
-        connectFunctionsEmulator(fns, 'localhost', 5001);
-      }
       return fns;
     }),
 
     provideStorage(() => {
       const storage = getStorage();
-      if (environment.useEmulators) {
-        connectStorageEmulator(storage, 'localhost', 9199);
-      }
       return storage;
     }),
 
