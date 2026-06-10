@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Bus, User } from '@core/interfaces';
 import { selectCurrentUser } from '@core/store/auth/auth.selectors';
-import { LOAD_BUS_TRIP_HISTORY } from '@core/store/buses/buses.actions';
+import { LOAD_BUS_TRIP_HISTORY, LOAD_BUSES } from '@core/store/buses/buses.actions';
 import { selectAllBuses, selectHistoryLoading, selectSelectedBusTripHistory } from '@core/store/buses/buses.selector';
 import { Store } from '@ngrx/store';
 import { TagModule } from 'primeng/tag';
@@ -23,12 +23,15 @@ export class DriverHistory {
   constructor(private store: Store) {}
 
   ngOnInit(): void {
+    this.store.dispatch(LOAD_BUSES());
+
     // Load history for the driver's assigned bus
     this.store.select(selectCurrentUser).pipe(
       takeUntil(this.destroy$),
       filter((user): user is User => user !== null),
       switchMap(user =>
         this.store.select(selectAllBuses).pipe(
+          filter(buses => buses.length > 0),
           map(buses => buses.find(b => b.driverId === user.uid) ?? null)
         )
       ),
