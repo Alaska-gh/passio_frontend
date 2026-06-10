@@ -26,25 +26,46 @@
   <ng-container *ngIf="!(summaryLoading$ | async)">
     <ng-container *ngIf="summary$ | async as summary">
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"> 
-        <div class="bg-white rounded-2xl p-4 shadow-sm">
-          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Tickets Today</p>
-          <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalTickets }}</p>
-          <p class="text-xs text-gray-400 mt-1">Issued by you</p>
-        </div>
+      <div class="overflow-x-auto hide-scrollbar -mx-4 px-4">
+          <div class="flex gap-3 pb-2" style="min-width: max-content ms-auto">
 
-        <div class="bg-white rounded-2xl p-4 shadow-sm">
-          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Revenue Today</p>
-          <p class="text-3xl font-bold text-orange-600 mt-1">GHS {{ summary.totalRevenue }}</p>
-          <p class="text-xs text-gray-400 mt-1">Total collected</p>
-        </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm w-56 shrink-0">
+              <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                Tickets Today
+              </p>
+              <p class="text-3xl font-bold text-orange-600 mt-1">
+                {{ summary.totalTickets }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">
+                Issued by you
+              </p>
+            </div>
 
-        <div class="bg-white rounded-2xl p-4 shadow-sm">
-          <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Seats Sold</p>
-          <p class="text-3xl font-bold text-orange-600 mt-1">{{ summary.totalSeats }}</p>
-          <p class="text-xs text-gray-400 mt-1">Across all routes</p>
-        </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm w-56 shrink-0">
+              <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                Revenue Today
+              </p>
+              <p class="text-3xl font-bold text-orange-600 mt-1">
+                GHS {{ summary.totalRevenue }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">
+                Total collected
+              </p>
+            </div>
 
+            <div class="bg-white rounded-2xl p-4 shadow-sm w-56 shrink-0">
+              <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                Seats Sold
+              </p>
+              <p class="text-3xl font-bold text-orange-600 mt-1">
+                {{ summary.totalSeats }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">
+                Across all routes
+              </p>
+            </div>
+
+          </div>
       </div>
 
       <!-- Last Ticket -->
@@ -73,7 +94,7 @@
 
       <!-- Empty state -->
       <div *ngIf="summary.totalTickets === 0"
-        class="bg-white rounded-2xl p-8 shadow-sm text-center">
+        class="bg-white rounded-2xl p-8 shadow-sm max-w-4xl text-center">
         <div class="w-14 h-14 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

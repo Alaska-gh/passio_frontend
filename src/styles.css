@@ -22,3 +22,14 @@ body:has(.loading-overlay) {
   background: #ea580c !important;
   color: white !important;
 }
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-<div class="p-6 flex flex-col gap-5 overflow-hidden">
+<div class="p-6 flex flex-col gap-5 mx-4 md:mx-0">
 
     <!-- Bus Requests -->
   @if (pendingRequests$ | async; as requests) {
@@ -62,11 +62,13 @@
       <div class="px-5 py-3.5 border-b border-gray-100">
         <span class="text-sm font-semibold text-gray-700">All buses</span>
       </div>
-      <p-table [value]="(buses$ | async) ?? []" 
+      <div class="overflow-x-auto">
+        <p-table [value]="(buses$ | async) ?? []" 
         [loading]="!!(busesLoading$ | async)"
         responsiveLayout="scroll"
         scrollable="true"
         scrollDirection="horizontal"
+        [tableStyle]="{ 'min-width': '900px' }"
         >
         <ng-template pTemplate="header">
           <tr>
@@ -138,6 +140,7 @@
           <tr><td colspan="6" class="text-center text-gray-400 py-8">No buses found</td></tr>
         </ng-template>
       </p-table>
+      </div>
     </div>
   }
 
