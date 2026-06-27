@@ -14,4 +14,7 @@ export const environment = {
   arkesel: {
     baseUrl: "_BASE_URL",
   },
+  ghanaPostGPS: {
+    ghanaPostApiKey: "__GPS_API_KEY"
+  }
 };
