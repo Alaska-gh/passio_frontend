@@ -28,6 +28,8 @@ jobs:
           STORAGE_BUCKET: ${{ github.ref == 'refs/heads/dev' && secrets.STORAGE_BUCKET_DEV || secrets.STORAGE_BUCKET_PROD }}
           MESSAGE_SENDER_ID: ${{ github.ref == 'refs/heads/dev' && secrets.MESSAGE_SENDER_ID_DEV || secrets.MESSAGE_SENDER_ID_PROD }}
           APP_ID: ${{ github.ref == 'refs/heads/dev' && secrets.APP_ID_DEV || secrets.APP_ID_PROD }}
+          PUBLIC_KEY: ${{ github.ref == 'refs/heads/dev' && secrets.PUBLIC_KEY_DEV || secrets.PUBLIC_KEY_PROD }}
+          BASE_URL: ${{ github.ref == 'refs/heads/dev' && secrets.BASE_URL_DEV || secrets.BASE_URL_PROD }}
           GPS_API_KEY: ${{ github.ref == 'refs/heads/dev' && secrets.GPS_API_KEY_DEV || secrets.GPS_API_KEY_PROD }}
 
           PRODUCTION: ${{ github.ref == 'refs/heads/master' && 'true' || 'false' }}
