@@ -1,5 +1,3 @@
-import { Bus } from "./bus.interface";
-
 export interface Trip {
   id?: string;
   route: string;
@@ -13,5 +11,35 @@ export interface Trip {
   pricePerSeat: number;
   busId: string
   busPlateNumber: string
-  status: 'open' | 'full' | 'departed';
+  status: 'open' | 'full';
+  trackingSessionId?: string;
+  trackingJoinToken?: string;
+  trackingStartedAt?: Date;
+}
+
+export interface TripTracking {
+  id?: string;
+
+  tripId: string;
+
+  originLat: number;
+  originLng: number;
+
+  destinationLat: number;
+  destinationLng: number;
+
+  currentLat?: number;
+  currentLng?: number;
+
+  departedAt?: string;
+  arrivedAt?: string;
+  returnedAt?: string;
+
+  leftOrigin: boolean;
+  reachedDestination: boolean;
+
+  meetSessionId: string;
+  meetJoinToken: string;
+
+  trackingEnabled: boolean;
 }

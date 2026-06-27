@@ -1,17 +1,22 @@
 export interface RouteStop {
   name: string;
+  lat?: number;
+  lng?: number;
   distanceFromOriginKm: number;
 }
-
 export interface BusRoute {
   id: string;
   origin: string;
   destination: string;
   stops: RouteStop[];
-  distanceKm: number;
   estimatedDurationMin: number;
+  distanceKm: number,
   fareGHS: number;
-  destinationLat?: number;
-  destinationLng?: number;
-  active: boolean;
+  originLat: number;
+  originLng: number;
+  originRadiusKm: number;
+  destinationLat: number;
+  destinationLng: number;
+  destinationRadiusKm: number;
+  active: boolean
 }

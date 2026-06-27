@@ -93,7 +93,6 @@ export class IssueTicketComponent implements OnInit{
     const isMobileMoneyNumberValid = phoneRegex.test(
       this.mobileMoneyNumber.trim()
     );
-
     return !!(
       this.selectedRoute &&
       this.travelDate &&
@@ -187,5 +186,6 @@ export class IssueTicketComponent implements OnInit{
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.resetForm()
   }
 }
