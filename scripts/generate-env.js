@@ -12,7 +12,8 @@ function generate(templatePath, outputPath) {
     .replace('__MESSAGE_SENDER_ID__', process.env.MESSAGE_SENDER_ID)
     .replace('__APP_ID__', process.env.APP_ID)
     .replace('__PUBLIC_KEY__', process.env.PUBLIC_KEY)
-    .replace('__BASE_URL__', process.env.BASE_URL);
+    .replace('__BASE_URL__', process.env.BASE_URL)
+    .replace('__GPS_API_KEY__', process.env.GPS_API_KEY);
 
   fs.writeFileSync(outputPath, file);
 }
