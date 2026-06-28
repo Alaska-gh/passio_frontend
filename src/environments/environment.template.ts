@@ -1,5 +1,6 @@
 export const environment = {
   production: "__PRODUCTION__",
+  buildId: '__BUILD_ID__',
   firebase: {
     apiKey: "__API_KEY__",
     authDomain: "__AUTH_DOMAIN__",

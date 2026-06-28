@@ -5,6 +5,12 @@ on:
     branches:
       - dev
       - master
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'angular.json'
+      - 'firebase.json'
+      - 'scripts/**'
 
 jobs:
   deploy:
@@ -31,8 +37,8 @@ jobs:
           PUBLIC_KEY: ${{ github.ref == 'refs/heads/dev' && secrets.PUBLIC_KEY_DEV || secrets.PUBLIC_KEY_PROD }}
           BASE_URL: ${{ github.ref == 'refs/heads/dev' && secrets.BASE_URL_DEV || secrets.BASE_URL_PROD }}
           GPS_API_KEY: ${{ github.ref == 'refs/heads/dev' && secrets.GPS_API_KEY_DEV || secrets.GPS_API_KEY_PROD }}
-
           PRODUCTION: ${{ github.ref == 'refs/heads/master' && 'true' || 'false' }}
+          BUILD_ID: ${{ github.sha }}
 
        # Build staging with staging configuration
       - name: Build Staging

@@ -5,6 +5,7 @@ function generate(templatePath, outputPath) {
 
   file = file
     .replace('__PRODUCTION__', process.env.PRODUCTION)
+    .replace('__BUILD_ID__', process.env.BUILD_ID || 'local')
     .replace('__API_KEY__', process.env.API_KEY)
     .replace('__AUTH_DOMAIN__', process.env.AUTH_DOMAIN)
     .replace('__PROJECT_ID__', process.env.PROJECT_ID)
