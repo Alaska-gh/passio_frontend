@@ -11,6 +11,10 @@ export interface Bus {
   createdAt?: Date;
   busType: string;
   queueOrder: number | null;
+  currentRoute?: string;
+  currentTripId?: string;
+  trackingSessionId?: string;
+  trackingJoinToken?: string;
 }
 
 export interface BusRequest {

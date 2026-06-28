@@ -25,24 +25,30 @@ export class RouteService {
     const useMock = true;
 
   if (useMock) {
-    return of([
-      {
-        id: '1',
-        origin: 'Koforidua',
-        destination: 'Accra',
-        stops: [
-          { name: 'Madina' },
-          { name: 'Tema Station' }
-        ] as RouteStop[],
-        distanceKm: 250,
-        estimatedDurationMin: 240,
-        fareGHS: 50,
-        active: true,
-        destinationLat: 6.6885,
-        destinationLng: -1.6244,
-      }
-    ]).pipe(delay(500));
-   }
+  return of([
+    {
+      id: '1',
+      origin: 'Koforidua',
+      destination: 'Accra',
+      stops: [
+        { name: 'Madina' },
+        { name: 'Tema Station' }
+      ] as RouteStop[],
+      distanceKm: 250,
+      estimatedDurationMin: 240,
+      fareGHS: 50,
+      active: true,
+      // Origin — Koforidua
+      originLat: 6.0940,
+      originLng: -0.2590,
+      originRadiusKm: 2,
+      // Destination — Accra
+      destinationLat: 5.6037,
+      destinationLng: -0.1870,
+      destinationRadiusKm: 2,
+    }
+  ] as BusRoute[]).pipe(delay(500));
+}
     return runInInjectionContext(this.injector, () => {
       const routesRef = collection(this.firestore, 'routes');
       const q = query(routesRef, where('active', '==', true));

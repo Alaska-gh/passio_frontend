@@ -65,27 +65,69 @@
       }
 
       <div class="flex flex-col gap-2">
-        @if (bus.status === 'on-trip') {
+       @if (bus.status === 'on-trip') {
+          <div class="flex flex-col gap-3">
+
+            <!-- Tracking status -->
+            <div class="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full shrink-0"
+                [class.bg-green-500]="trackingConnected$ | async"
+                [class.bg-gray-300]="!(trackingConnected$ | async)">
+              </span>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-gray-600">
+                  {{ (trackingConnected$ | async) ? 'Location tracking active' : 'Connecting to tracking...' }}
+                </p>
+                @if (distanceToDestination !== null) {
+                  <p class="text-xs text-gray-400 mt-0.5">
+                    {{ distanceToDestination.toFixed(1) }}km to {{ bus.currentRoute!.split('→')[1]?.trim() }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <!-- Location error -->
+            @if (locationError) {
+              <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-3 flex items-start gap-2">
+                <i class="fas fa-map-marker text-red-400 mt-0.5 shrink-0"></i>
+                <p class="text-xs text-red-600">{{ locationError }}</p>
+              </div>
+            }
+
+           <div class="flex flex-col md:flex-row justify-between">
+             <div class="flex">
+                <p-button
+                  label="Report Return to Station"
+                  icon="fas fa-map-marker"
+                  styleClass=" bg-orange-600! border-none! text-white! hover:bg-orange-700!"
+                  [loading]="reportingReturn"
+                  (onClick)="reportReturn(bus)" />
+                <span> <i class="fas fa-info-circle text-orange-400" 
+                  pTooltip="Your location will be verified before reporting" tooltipPosition="top"></i></span>
+             </div>
+
+            <p-button
+              label="Sign Off"
+              icon="fas fa-user-edit"
+              styleClass=" bg-black! border-none! border-black-600! text-white! hover:bg-gray-600!"
+              (onClick)="openSignOffModal(bus)" />
+           </div>
+          </div>
+        }@else {
           <p-button
-            label="Report Return to Station"
-            icon="fas fa-map-marker"
-            styleClass="w-full bg-green-600! border-green-600! text-white! hover:bg-green-700!"
-            [loading]="reportingReturn"
-            (onClick)="reportReturn(bus)" />
+            label="Sign Off"
+            icon="fas fa-user-edit"
+            styleClass=" bg-black! border-none! border-black-600! text-white! hover:bg-gray-600!"
+            (onClick)="openSignOffModal(bus)" />
         }
-        <p-button
-          label="Sign Off"
-          icon="fas fa-user-edit"
-          severity="warn"
-          styleClass="w-full"
-          (onClick)="openSignOffModal(bus)" />
+         
       </div>
     </div>
   } @else {
     <div class="bg-white rounded-2xl p-5 shadow-sm text-center">
       <i class="fas fa-bus text-4xl text-gray-200 mb-3 block"></i>
       <p class="text-sm font-semibold text-gray-600">No Bus Assigned</p>
-      <p class="text-xs text-gray-400 mt-1">
+      <p class="text-xs text-gray-400 my-2">
         You can sign on to yor own bus or someone's bus or contact admin to assign a bus to you
       </p>
        <p-button

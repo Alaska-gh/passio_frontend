@@ -310,4 +310,16 @@ submitBusRequest(request: Omit<BusRequest, 'id'>): Observable<string> {
     reviewedAt: data.reviewedAt?.toDate?.() ?? null,
   } as BusRequest;
 }
+
+  updateBusTracking(busId: string, tracking: {
+    trackingSessionId: string;
+    trackingJoinToken: string;
+    }): Observable<void> {
+      return defer(() =>
+        runInInjectionContext(this.injector, () => {
+          const busRef = doc(this.firestore, 'busses', busId);
+          return from(updateDoc(busRef, { ...tracking }));
+        })
+      );
+  }
 }

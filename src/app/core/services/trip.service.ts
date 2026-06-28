@@ -211,6 +211,8 @@ export class TripService {
               transaction.update(currentBusRef, {
                 status: 'on-trip',
                 queueOrder: null,
+                currentRoute: route,       
+                currentTripId: tripId,
               });
             }
 
@@ -300,6 +302,8 @@ export class TripService {
               status: 'active',
               queueOrder: newQueueOrder,
               returnedAt: new Date(), // useful for audit/admin view
+              currentRoute: null,      
+              currentTripId: null,
             }));
           })
         );
@@ -308,31 +312,45 @@ export class TripService {
   }
 
   reorderQueue(): Observable<void> {
-    return defer(() =>
-      runInInjectionContext(this.injector, () => {
-        const busesRef = collection(this.firestore, 'busses');
-        const q = query(
-          busesRef,
-          where('status', '==', 'active'),
-          orderBy('queueOrder', 'asc')
-        );
+  return defer(() =>
+    runInInjectionContext(this.injector, () => {
+      const busesRef = collection(this.firestore, 'busses');
+      const q = query(
+        busesRef,
+        where('status', '==', 'active'),
+        orderBy('queueOrder', 'asc')
+      );
 
-        return from(getDocs(q)).pipe(
-          switchMap((snapshot) => {
-            if (snapshot.empty) return of(undefined);
+      // Get the doc refs first (outside transaction, just to know which docs exist)
+      return from(getDocs(q)).pipe(
+        switchMap((snapshot) => {
+          if (snapshot.empty) return of(undefined);
 
-            //Reassign queueOrder 1, 2, 3... to all active buses
-            return from(
-              runTransaction(this.firestore, async (transaction) => {
-                snapshot.docs.forEach((d, index) => {
-                  transaction.update(d.ref, { queueOrder: index + 1 });
-                });
-              })
-            );
-          }),
-          map(() => undefined)
-        );
-      })
-    );
-  }
+          const refs = snapshot.docs.map(d => d.ref);
+
+          return from(
+            runTransaction(this.firestore, async (transaction) => {
+              // Read each doc through the transaction for consistency
+              const freshSnaps = await Promise.all(
+                refs.map(ref => transaction.get(ref))
+              );
+
+              // Re-sort by current queueOrder in case it changed
+              const sorted = freshSnaps
+                .filter(snap => snap.exists())
+                .sort((a, b) =>
+                  (a.data()!['queueOrder'] ?? 999) - (b.data()!['queueOrder'] ?? 999)
+                );
+
+              sorted.forEach((snap, index) => {
+                transaction.update(snap.ref, { queueOrder: index + 1 });
+              });
+            })
+          );
+        }),
+        map(() => undefined)
+      );
+    })
+  );
+}
 }
