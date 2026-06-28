@@ -144,12 +144,16 @@ export class DriverHome {
             const distanceKm = this.geoService.haversineKm(coords, originCenter);
             const isAtStation = distanceKm <= route.originRadiusKm;
 
-             this.geoService.reverseGeocode(originCenter).subscribe((originName) =>{              
+             this.geoService.reverseGeocode(originCenter).subscribe((originName) =>{ 
+              console.log(originCenter);
+                           
                  if(originName){
                     this.originLocation = originName
                  }
              })
-            this.geoService.reverseGeocode(coords).subscribe((positionName) =>{              
+            this.geoService.reverseGeocode(coords).subscribe((positionName) =>{  
+              console.log(coords);
+                          
               if(positionName){
                 this.currentLocation = positionName
               }
