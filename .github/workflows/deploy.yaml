@@ -34,7 +34,16 @@ jobs:
 
           PRODUCTION: ${{ github.ref == 'refs/heads/master' && 'true' || 'false' }}
 
-      - run: npm run build -- --configuration production
+       # Build staging with staging configuration
+      - name: Build Staging
+        if: github.ref == 'refs/heads/dev'
+        run: npm run build -- --configuration staging
+
+
+      #Build production with production configuration
+      - name: Build Production
+        if: github.ref == 'refs/heads/master'
+        run: npm run build -- --configuration production
 
       - run: npm install -g firebase-tools
 

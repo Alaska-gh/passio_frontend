@@ -18,7 +18,6 @@ function generate(templatePath, outputPath) {
   fs.writeFileSync(outputPath, file);
 }
 
-generate(
-  './src/environments/environment.template.ts',
-  './src/environments/environment.ts'
-);
+const template = './src/environments/environment.template.ts'
+generate(template, './src/environments/environment.ts');
+generate(template,'./src/environments/environment.staging.ts');
