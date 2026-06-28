@@ -4,7 +4,7 @@ function generate(templatePath, outputPath) {
   let file = fs.readFileSync(templatePath, 'utf8');
 
   file = file
-    .replace('__PRODUCTION__', process.env.PRODUCTION)
+    .replace("'__PRODUCTION__'", process.env.PRODUCTION)
     .replace('__BUILD_ID__', process.env.BUILD_ID || 'local')
     .replace('__API_KEY__', process.env.API_KEY)
     .replace('__AUTH_DOMAIN__', process.env.AUTH_DOMAIN)
